@@ -108,7 +108,8 @@ TEMPLATES = [{
 WSGI_APPLICATION = 'drmoonlight.wsgi.application'
 
 # CUSTOM USER ACCOUNT MODEL
-AUTH_USER_MODEL = 'accounts.User'
+# TODO: uncomment when create accounts
+# AUTH_USER_MODEL = 'accounts.User'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
