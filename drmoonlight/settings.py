@@ -66,6 +66,7 @@ THIRD_PARTY_APPS = [
     'storages',
     'django_extensions',
     'django_filters',
+    'django_fsm',
     'constance',
     'constance.backends.database',
     'raven.contrib.django.raven_compat',
