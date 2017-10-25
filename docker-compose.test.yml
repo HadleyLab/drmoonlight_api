@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+  db:
+    image: postgres:9.4-alpine
+    ports:
+    - 5432
+
+  server:
+    image: $BUILD_IMAGE
+    ports:
+    - 8000:8000
+    links:
+    - db
+    environment:
+      DATABASE_URL: postgres://postgres@db/postgres
+      IS_CI: "True"
+    volumes:
+    - ./reports:/app/reports/unit
+
+  wait_for:
+    image: jwilder/dockerize
+    command: dockerize -wait tcp://db:5432 -timeout 60s

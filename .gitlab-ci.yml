@@ -1,0 +1,42 @@
+stages:
+  - build
+  - test
+  - release
+  - cleanup
+
+variables:
+  CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+  BUILD_IMAGE: drmoonlight-api:$CI_BUILD_REF
+
+build:
+  stage: build
+  script:
+    - docker build -t $BUILD_IMAGE .
+
+test:
+  stage: test
+  script:
+    - docker-compose -f docker-compose.test.yml up -d db
+    - docker-compose -f docker-compose.test.yml run --rm wait_for
+    - docker-compose -f docker-compose.test.yml run --rm server sh -c 'coverage run ./manage.py test && coverage report && coverage html && chmod -R 777 /app/reports'
+  after_script:
+    - docker-compose -f docker-compose.test.yml down
+  artifacts:
+    paths:
+    - ./reports
+
+release:
+  stage: release
+  script:
+    - docker tag $BUILD_IMAGE $CONTAINER_RELEASE_IMAGE
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker push $CONTAINER_RELEASE_IMAGE
+  only:
+    - master
+    - develop
+
+cleanup:
+  stage: cleanup
+  script:
+    - bash -c "[ -z $(docker images -q $BUILD_IMAGE) ] || docker rmi $BUILD_IMAGE"
+  when: always
