@@ -58,7 +58,7 @@ DJANGO_APPS = [
 ]
 
 PROJECT_APPS = [
-
+    'apps.accounts',
 ]
 
 THIRD_PARTY_APPS = [
@@ -108,8 +108,7 @@ TEMPLATES = [{
 WSGI_APPLICATION = 'drmoonlight.wsgi.application'
 
 # CUSTOM USER ACCOUNT MODEL
-# TODO: uncomment when create accounts
-# AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'accounts.User'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases

@@ -1,0 +1,87 @@
+from django.db import models
+
+from .user import User
+from .speciality import Speciality
+from .residency_program import ResidencyProgram
+
+
+class ResidentProfileSettingsMixin(object):
+    earliest_availability_for_shift = models.TextField(
+        verbose_name='Earliest availability for a shift',
+        blank=True
+    )
+    preferences_for_work_location = models.TextField(
+        verbose_name='Preferences for a work location',
+        blank=True
+    )
+    state_license = models.BooleanField(
+        verbose_name='Has state licence',
+        default=False
+    )
+    state = models.CharField(
+        verbose_name='State licence\'s state',
+        blank=True
+    )
+    federal_dea_active = models.BooleanField(
+        verbose_name='Is federal dea active',
+        default=False
+    )
+    bls_acls_pals = models.BooleanField(
+        verbose_name='Has BLC/ACLS/PALS',
+        default=False
+    )
+    active_permanent_residence_card_or_visa = models.BooleanField(
+        verbose_name='Has active permanent residence card or visa',
+        default=False
+    )
+    active_current_driver_license_or_passport = models.BooleanField(
+        verbose_name='Has active current driver license or passport',
+        default=False
+    )
+    active_npi_number = models.BooleanField(
+        verbose_name='Has active npi number',
+        default=False
+    )
+    ecfmg = models.BooleanField(
+        verbose_name='ECFMG',
+        default=False
+    )
+    active_board_certificates = models.BooleanField(
+        verbose_name='Has active board certificates',
+        default=False
+    )
+
+
+class ResidentNotificationSettingsMixin(object):
+    notification_new_shifts = models.BooleanField(
+        verbose_name='Notify about new shifts',
+        default=True
+    )
+    notification_application_status_changing = models.BooleanField(
+        verbose_name='Notify about an application status changing',
+        default=True
+    )
+    notification_new_messages = models.BooleanField(
+        verbose_name='Notify about new messages',
+        default=True
+    )
+
+
+class Resident(ResidentNotificationSettingsMixin,
+               ResidentProfileSettingsMixin, User):
+    specialities = models.ManyToManyField(
+        Speciality,
+        verbose_name='Specialities'
+    )
+    residency_program = models.ForeignKey(
+        ResidencyProgram,
+        verbose_name='Residency program'
+    )
+    residency_year = models.PositiveIntegerField(
+        verbose_name='Residency year',
+    )
+    # approved = models.BooleanField()
+
+    class Meta:
+        verbose_name = 'Resident'
+        verbose_name_plural = 'Residents'
