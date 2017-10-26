@@ -80,7 +80,6 @@ class Resident(ResidentNotificationSettingsMixin,
     residency_year = models.PositiveIntegerField(
         verbose_name='Residency year',
     )
-    # approved = models.BooleanField()
 
     class Meta:
         verbose_name = 'Resident'
