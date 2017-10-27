@@ -1,5 +1,5 @@
 from django.db import models
-from easymoney import MoneyField
+from contrib.easymoney import MoneyField
 
 from apps.accounts.models import Scheduler, Speciality, ResidencyProgram
 from apps.main.models import TimestampModelMixin
