@@ -1,17 +1,10 @@
 from django.db import models
 
 from apps.accounts.models import Scheduler, Speciality, ResidencyProgram
+from apps.main.models import TimestampModelMixin
 
 
-class Shift(models.Model):
-    date_created = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Date created'
-    )
-    date_modified = models.DateTimeField(
-        auto_now=True,
-        verbose_name='Date modified'
-    )
+class Shift(TimestampModelMixin, models.Model):
     date_start = models.DateTimeField(
         verbose_name='Date start'
     )

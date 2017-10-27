@@ -1,18 +1,28 @@
 from django.db import models
+from django_fsm import FSMIntegerField
 
 from apps.accounts.models import Resident
+from apps.main.models import TimestampModelMixin
 from .shift import Shift
 
 
-class Application(models.Model):
-    date_created = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Date created'
-    )
-    date_modified = models.DateTimeField(
-        auto_now=True,
-        verbose_name='Date modified'
-    )
+class ApplicationStateEnum(object):
+    NEW = 1
+
+    # First stage
+    APPROVED = 2
+    REJECTED = 3
+
+    # Second stage
+    CONFIRMED = 4
+    CANCELLED = 5
+
+    # Third stage
+    FAILED = 6
+    COMPLETED = 7
+
+
+class Application(TimestampModelMixin, models.Model):
     owner = models.ForeignKey(
         Resident,
         verbose_name='Owner'
@@ -21,6 +31,7 @@ class Application(models.Model):
         Shift,
         verbose_name='Shift'
     )
+    state = FSMIntegerField(default=ApplicationStateEnum.NEW)
 
     class Meta:
         verbose_name = 'Application'

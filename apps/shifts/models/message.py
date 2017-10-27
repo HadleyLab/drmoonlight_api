@@ -1,14 +1,11 @@
 from django.db import models
 
 from apps.accounts.models import User
+from apps.main.models import TimestampModelMixin
 from .application import Application
 
 
-class Message(models.Model):
-    date_created = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Date created'
-    )
+class Message(TimestampModelMixin, models.Model):
     owner = models.ForeignKey(
         User,
         verbose_name='Owner'
