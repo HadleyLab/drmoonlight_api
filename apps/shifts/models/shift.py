@@ -1,4 +1,5 @@
 from django.db import models
+from easymoney import MoneyField
 
 from apps.accounts.models import Scheduler, Speciality, ResidencyProgram
 from apps.main.models import TimestampModelMixin
@@ -27,7 +28,7 @@ class Shift(TimestampModelMixin, models.Model):
         verbose_name='Residency years required',
         null=True
     )
-    payment_amount = models.PositiveIntegerField(
+    payment_amount = MoneyField(
         verbose_name='Payment amount'
     )
     payment_per_hour = models.BooleanField(
