@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from contrib.easymoney import MoneyField
 
 from apps.accounts.models import Scheduler, Speciality, ResidencyProgram
@@ -27,7 +28,7 @@ class Shift(TimestampModelMixin, models.Model):
     )
     residency_years_required = models.PositiveIntegerField(
         verbose_name='Residency years required',
-        null=True, blank=True
+        default=0
     )
     payment_amount = MoneyField(
         verbose_name='Payment amount'
@@ -47,3 +48,11 @@ class Shift(TimestampModelMixin, models.Model):
     def __str__(self):
         return "{0}-{1} {2}".format(
             self.date_start, self.date_end, self.speciality)
+
+    @property
+    def is_started(self):
+        return self.date_start <= timezone.now()
+
+    @property
+    def is_ended(self):
+        return self.date_end < timezone.now()

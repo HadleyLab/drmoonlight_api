@@ -1,5 +1,5 @@
 from django.db import models
-from django_fsm import FSMIntegerField, transition
+from django_fsm import FSMIntegerField, transition, RETURN_VALUE
 
 from apps.accounts.models import Resident
 from apps.main.models import TimestampModelMixin
@@ -22,7 +22,43 @@ class ApplicationStateEnum(object):
     COMPLETED = 7
 
 
+def is_scheduler(instance, user):
+    return user.is_scheduler and instance.shift.owner == user.scheduler
+
+
+def is_resident(instance, user):
+    return user.is_resident and instance.owner == user
+
+
+def is_scheduler_or_resident(instance, user):
+    return is_scheduler(instance, user) or is_resident(instance, user)
+
+
 class Application(TimestampModelMixin, models.Model):
+    """
+    Application workflow:
+    1. A resident creates an application with NEW state.
+
+    2. A scheduler can:
+        2.1. Approve the application
+        The application will become APPROVED. The other new applications
+        will become REJECTED.
+        2.2. Reject the application
+        The state will be changed to REJECTED.
+
+    3. The resident can:
+        3.1. Confirm the application
+        The application will become CONFIRMED.
+        3.2. Cancel the application
+        The application will become CANCELLED.
+
+    4. The scheduler or the resident can cancel the confirmed application
+    The application will become FAILED.
+
+    5. The scheduler can complete the application after the resident completes
+    the shift in real life
+    The application will become COMPLETED.
+    """
     owner = models.ForeignKey(
         Resident,
         related_name='applications',
@@ -33,7 +69,10 @@ class Application(TimestampModelMixin, models.Model):
         related_name='applications',
         verbose_name='Shift'
     )
-    state = FSMIntegerField(default=ApplicationStateEnum.NEW)
+    state = FSMIntegerField(
+        verbose_name='State',
+        default=ApplicationStateEnum.NEW
+    )
 
     class Meta:
         verbose_name = 'Application'
@@ -44,10 +83,11 @@ class Application(TimestampModelMixin, models.Model):
 
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,
-                target=ApplicationStateEnum.APPROVED)
+                target=ApplicationStateEnum.APPROVED,
+                permission=is_scheduler)
     def approve(self):
         """
-        Approves current application and makes rejected all other
+        Approves the application and makes rejected all other
         new applications
         """
         new_applications = self.shift.applications.exclude(
@@ -59,27 +99,48 @@ class Application(TimestampModelMixin, models.Model):
 
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,
-                target=ApplicationStateEnum.REJECTED)
+                target=ApplicationStateEnum.REJECTED,
+                permission=is_scheduler)
     def reject(self):
         pass
 
     @transition(field=state,
                 source=ApplicationStateEnum.APPROVED,
-                target=ApplicationStateEnum.CONFIRMED)
+                target=ApplicationStateEnum.CONFIRMED,
+                permission=is_resident)
     def confirm(self):
         pass
 
     @transition(field=state,
-                source=ApplicationStateEnum.APPROVED,
-                target=ApplicationStateEnum.CANCELLED)
-    @transition(field=state,
-                source=ApplicationStateEnum.CONFIRMED,
-                target=ApplicationStateEnum.FAILED)
+                source=[
+                    ApplicationStateEnum.APPROVED,
+                    ApplicationStateEnum.CONFIRMED,
+                ],
+                target=RETURN_VALUE(
+                    ApplicationStateEnum.CANCELLED,
+                    ApplicationStateEnum.FAILED,
+                ),
+                permission=is_scheduler_or_resident)
     def cancel(self):
-        pass
+        """
+        Cancels the application if a confirmed shift is not started
+        """
+        if not self.shift.is_started:
+            # TODO: send notification to REJECTED application's owners
+            # TODO: about shift availability
+            pass
+
+            if self.state == ApplicationStateEnum.APPROVED:
+                # TODO: discuss it. May be if the resident cancels
+                # TODO: the CONFIRMED application for the not started shift
+                # TODO: we should always transit the application to cancelled
+                return ApplicationStateEnum.CANCELLED
+
+        return ApplicationStateEnum.FAILED
 
     @transition(field=state,
                 source=ApplicationStateEnum.CONFIRMED,
-                target=ApplicationStateEnum.COMPLETED)
+                target=ApplicationStateEnum.COMPLETED,
+                permission=is_scheduler)
     def complete(self):
         pass
