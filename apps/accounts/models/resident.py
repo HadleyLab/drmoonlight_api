@@ -6,7 +6,7 @@ from .speciality import Speciality
 from .residency_program import ResidencyProgram
 
 
-class ResidentProfileSettingsMixin(object):
+class ResidentProfileSettingsMixin(models.Model):
     earliest_availability_for_shift = models.TextField(
         verbose_name='Earliest availability for a shift',
         blank=True
@@ -21,6 +21,7 @@ class ResidentProfileSettingsMixin(object):
     )
     state = models.CharField(
         verbose_name='State licence\'s state',
+        max_length=255,
         blank=True
     )
     federal_dea_active = models.BooleanField(
@@ -52,8 +53,11 @@ class ResidentProfileSettingsMixin(object):
         default=None
     )
 
+    class Meta:
+        abstract = True
 
-class ResidentNotificationSettingsMixin(object):
+
+class ResidentNotificationSettingsMixin(models.Model):
     notification_new_shifts = models.BooleanField(
         verbose_name='Notify about new shifts',
         default=True
@@ -66,6 +70,9 @@ class ResidentNotificationSettingsMixin(object):
         verbose_name='Notify about new messages',
         default=True
     )
+
+    class Meta:
+        abstract = True
 
 
 class ResidentStateEnum(object):

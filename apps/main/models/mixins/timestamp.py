@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class TimestampModelMixin(object):
+class TimestampModelMixin(models.Model):
     date_created = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Date created'
@@ -10,3 +10,6 @@ class TimestampModelMixin(object):
         auto_now=True,
         verbose_name='Date modified'
     )
+
+    class Meta:
+        abstract = True
