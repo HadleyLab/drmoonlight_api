@@ -77,9 +77,8 @@ class ResidentNotificationSettingsMixin(models.Model):
 
 class ResidentStateEnum(object):
     NEW = 1
-    EMAIL_CONFIRMED = 2
-    PROFILE_FILLED = 3
-    APPROVED = 4
+    PROFILE_FILLED = 2
+    APPROVED = 3
 
 
 class Resident(ResidentNotificationSettingsMixin,
@@ -110,17 +109,9 @@ class Resident(ResidentNotificationSettingsMixin,
     @transition(
         field=state,
         source=ResidentStateEnum.NEW,
-        target=ResidentStateEnum.EMAIL_CONFIRMED
-    )
-    def confirm_email(self):
-        pass
-
-    @transition(
-        field=state,
-        source=ResidentStateEnum.EMAIL_CONFIRMED,
         target=ResidentStateEnum.PROFILE_FILLED
     )
-    def approve(self):
+    def fill_profile(self):
         # TODO: send email to the managing editor
         pass
 
@@ -128,6 +119,7 @@ class Resident(ResidentNotificationSettingsMixin,
         field=state,
         source=ResidentStateEnum.PROFILE_FILLED,
         target=ResidentStateEnum.APPROVED
+        # TODO: only account manager
     )
     def approve(self):
         # TODO: send email to the resident
