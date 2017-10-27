@@ -10,3 +10,6 @@ class ResidencyProgram(models.Model):
     class Meta:
         verbose_name = 'Residency program'
         verbose_name_plural = 'Residency programs'
+
+    def __str__(self):
+        return "{0}".format(self.name)

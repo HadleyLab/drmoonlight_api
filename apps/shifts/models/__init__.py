@@ -1,3 +1,3 @@
 from .shift import Shift
-from .application import Application
+from .application import Application, ApplicationStateEnum
 from .message import Message

@@ -71,14 +71,17 @@ class Resident(ResidentNotificationSettingsMixin,
                ResidentProfileSettingsMixin, User):
     specialities = models.ManyToManyField(
         Speciality,
-        verbose_name='Specialities'
+        verbose_name='Specialities',
+        blank=True
     )
     residency_program = models.ForeignKey(
         ResidencyProgram,
-        verbose_name='Residency program'
+        verbose_name='Residency program',
+        null=True, blank=True
     )
     residency_year = models.PositiveIntegerField(
         verbose_name='Residency year',
+        null=True, blank=True
     )
 
     class Meta:

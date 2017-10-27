@@ -14,6 +14,7 @@ class Shift(TimestampModelMixin, models.Model):
     )
     owner = models.ForeignKey(
         Scheduler,
+        related_name='shifts',
         verbose_name='Owner'
     )
     speciality = models.ForeignKey(
@@ -26,7 +27,7 @@ class Shift(TimestampModelMixin, models.Model):
     )
     residency_years_required = models.PositiveIntegerField(
         verbose_name='Residency years required',
-        null=True
+        null=True, blank=True
     )
     payment_amount = MoneyField(
         verbose_name='Payment amount'
@@ -42,3 +43,7 @@ class Shift(TimestampModelMixin, models.Model):
     class Meta:
         verbose_name = 'Shift'
         verbose_name_plural = 'Shifts'
+
+    def __str__(self):
+        return "{0}-{1} {2}".format(
+            self.date_start, self.date_end, self.speciality)
