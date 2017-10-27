@@ -50,10 +50,11 @@ class Application(TimestampModelMixin, models.Model):
         3.1. Confirm the application
         The application will become CONFIRMED.
         3.2. Cancel the application
-        The application will become CANCELLED.
+        The application will become CANCELLED if shift was not started
+        otherwise become FAILED
 
     4. The scheduler or the resident can cancel the confirmed application
-    The application will become FAILED.
+    The application will become FAILED (TODO: on discuss).
 
     5. The scheduler can complete the application after the resident completes
     the shift in real life
