@@ -27,13 +27,13 @@ class ResidentProfileSettingsMixin(object):
         verbose_name='Is federal dea active',
         default=False
     )
-    bls_acls_pals = models.BooleanField(
+    bls_acls_pals = models.NullBooleanField(
         verbose_name='Has BLC/ACLS/PALS',
-        default=False
+        default=None
     )
-    active_permanent_residence_card_or_visa = models.BooleanField(
+    active_permanent_residence_card_or_visa = models.NullBooleanField(
         verbose_name='Has active permanent residence card or visa',
-        default=False
+        default=None
     )
     active_current_driver_license_or_passport = models.BooleanField(
         verbose_name='Has active current driver license or passport',
@@ -43,13 +43,13 @@ class ResidentProfileSettingsMixin(object):
         verbose_name='Has active npi number',
         default=False
     )
-    ecfmg = models.BooleanField(
+    ecfmg = models.NullBooleanField(
         verbose_name='ECFMG',
-        default=False
+        default=None
     )
-    active_board_certificates = models.BooleanField(
+    active_board_certificates = models.NullBooleanField(
         verbose_name='Has active board certificates',
-        default=False
+        default=None
     )
 
 
