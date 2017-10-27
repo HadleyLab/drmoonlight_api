@@ -1,4 +1,5 @@
 from django.db import models
+from django_fsm import FSMIntegerField, transition
 
 from .user import User
 from .speciality import Speciality
@@ -67,6 +68,13 @@ class ResidentNotificationSettingsMixin(object):
     )
 
 
+class ResidentStateEnum(object):
+    NEW = 1
+    EMAIL_CONFIRMED = 2
+    PROFILE_FILLED = 3
+    APPROVED = 4
+
+
 class Resident(ResidentNotificationSettingsMixin,
                ResidentProfileSettingsMixin, User):
     specialities = models.ManyToManyField(
@@ -83,7 +91,37 @@ class Resident(ResidentNotificationSettingsMixin,
         verbose_name='Residency year',
         null=True, blank=True
     )
+    state = FSMIntegerField(
+        verbose_name='State',
+        default=ResidentStateEnum.NEW
+    )
 
     class Meta:
         verbose_name = 'Resident'
         verbose_name_plural = 'Residents'
+
+    @transition(
+        field=state,
+        source=ResidentStateEnum.NEW,
+        target=ResidentStateEnum.EMAIL_CONFIRMED
+    )
+    def confirm_email(self):
+        pass
+
+    @transition(
+        field=state,
+        source=ResidentStateEnum.EMAIL_CONFIRMED,
+        target=ResidentStateEnum.PROFILE_FILLED
+    )
+    def approve(self):
+        # TODO: send email to the managing editor
+        pass
+
+    @transition(
+        field=state,
+        source=ResidentStateEnum.PROFILE_FILLED,
+        target=ResidentStateEnum.APPROVED
+    )
+    def approve(self):
+        # TODO: send email to the resident
+        pass
