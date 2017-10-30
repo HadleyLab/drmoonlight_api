@@ -81,6 +81,10 @@ class ResidentStateEnum(object):
     APPROVED = 3
 
 
+def is_account_manager(instance, user):
+    return user.is_account_manager
+
+
 class Resident(ResidentNotificationSettingsMixin,
                ResidentProfileSettingsMixin, User):
     specialities = models.ManyToManyField(
@@ -110,6 +114,8 @@ class Resident(ResidentNotificationSettingsMixin,
         field=state,
         source=ResidentStateEnum.NEW,
         target=ResidentStateEnum.PROFILE_FILLED
+        # TODO: Discuss with Ilya. This method can't be called via API
+        # It is internal method which should be called in profile change view
     )
     def fill_profile(self):
         # TODO: send email to the managing editor
@@ -118,8 +124,8 @@ class Resident(ResidentNotificationSettingsMixin,
     @transition(
         field=state,
         source=ResidentStateEnum.PROFILE_FILLED,
-        target=ResidentStateEnum.APPROVED
-        # TODO: only account manager
+        target=ResidentStateEnum.APPROVED,
+        permission=is_account_manager
     )
     def approve(self):
         # TODO: send email to the resident

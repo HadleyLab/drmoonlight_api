@@ -22,16 +22,17 @@ class ApplicationStateEnum(object):
     COMPLETED = 7
 
 
-def is_scheduler(instance, user):
+def can_scheduler_change_application(instance, user):
     return user.is_scheduler and instance.shift.owner == user.scheduler
 
 
-def is_resident(instance, user):
+def can_resident_change_application(instance, user):
     return user.is_resident and instance.owner == user
 
 
-def is_scheduler_or_resident(instance, user):
-    return is_scheduler(instance, user) or is_resident(instance, user)
+def can_resident_or_scheduler_change_application(instance, user):
+    return can_scheduler_change_application(instance, user) or \
+           can_resident_change_application(instance, user)
 
 
 class Application(TimestampModelMixin, models.Model):
@@ -54,7 +55,7 @@ class Application(TimestampModelMixin, models.Model):
         otherwise become FAILED
 
     4. The scheduler or the resident can cancel the confirmed application
-    The application will become FAILED (TODO: on discuss).
+    The application will become FAILED (TODO: discuss and update comment).
 
     5. The scheduler can complete the application after the resident completes
     the shift in real life
@@ -85,7 +86,7 @@ class Application(TimestampModelMixin, models.Model):
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,
                 target=ApplicationStateEnum.APPROVED,
-                permission=is_scheduler)
+                permission=can_scheduler_change_application)
     def approve(self):
         """
         Approves the application and makes rejected all other
@@ -101,14 +102,14 @@ class Application(TimestampModelMixin, models.Model):
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,
                 target=ApplicationStateEnum.REJECTED,
-                permission=is_scheduler)
+                permission=can_scheduler_change_application)
     def reject(self):
         pass
 
     @transition(field=state,
                 source=ApplicationStateEnum.APPROVED,
                 target=ApplicationStateEnum.CONFIRMED,
-                permission=is_resident)
+                permission=can_resident_change_application)
     def confirm(self):
         pass
 
@@ -121,7 +122,7 @@ class Application(TimestampModelMixin, models.Model):
                     ApplicationStateEnum.CANCELLED,
                     ApplicationStateEnum.FAILED,
                 ),
-                permission=is_scheduler_or_resident)
+                permission=can_resident_or_scheduler_change_application)
     def cancel(self):
         """
         Cancels the application if a confirmed shift is not started
@@ -142,6 +143,6 @@ class Application(TimestampModelMixin, models.Model):
     @transition(field=state,
                 source=ApplicationStateEnum.CONFIRMED,
                 target=ApplicationStateEnum.COMPLETED,
-                permission=is_scheduler)
+                permission=can_scheduler_change_application)
     def complete(self):
         pass
