@@ -6,14 +6,17 @@ dj-database-url==0.4.2
 django-constance==2.0.0
 django-filter==1.1.0
 django-fsm==2.6.0
-django-storages==1.6.5
+django-fsm-admin==1.2.4
 django-picklefield==1.0.0
+django-storages==1.6.5
 Django==1.11.6
 djangorestframework==3.7.1
+djoser==1.0.1
 git+git://github.com/Brogency/djangorestframework-camel-case@a6a448360941130678b62aebed5d5d09ba1214bb#egg=djangorestframework-camel-case
 gunicorn==19.7.1
 Pillow==4.3.0
 psycopg2==2.7.3.2
+python-postmark==0.4.12
 pytz==2017.2
 raven==6.2.1
 redis==2.10.6
@@ -25,6 +28,7 @@ ipdb
 ipdbplugin
 ipython==6.2.1
 
+django-db-email-backend==0.3
 coverage==4.4.1
 django-nose==1.4.5
 factory_boy==2.9.2

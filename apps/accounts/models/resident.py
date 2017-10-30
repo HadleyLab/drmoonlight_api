@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django_fsm import FSMIntegerField, transition
 
 from .user import User
@@ -80,6 +82,12 @@ class ResidentStateEnum(object):
     PROFILE_FILLED = 2
     APPROVED = 3
 
+    CHOICES = (
+        (NEW, 'New'),
+        (PROFILE_FILLED, 'Profile filled'),
+        (APPROVED, 'Approved'),
+    )
+
 
 def is_account_manager(instance, user):
     return user.is_account_manager
@@ -103,7 +111,8 @@ class Resident(ResidentNotificationSettingsMixin,
     )
     state = FSMIntegerField(
         verbose_name='State',
-        default=ResidentStateEnum.NEW
+        default=ResidentStateEnum.NEW,
+        choices=ResidentStateEnum.CHOICES
     )
 
     class Meta:
@@ -113,7 +122,8 @@ class Resident(ResidentNotificationSettingsMixin,
     @transition(
         field=state,
         source=ResidentStateEnum.NEW,
-        target=ResidentStateEnum.PROFILE_FILLED
+        target=ResidentStateEnum.PROFILE_FILLED,
+        custom=dict(admin=True)
         # TODO: Discuss with Ilya. This method can't be called via API
         # It is internal method which should be called in profile change view
     )
@@ -130,3 +140,8 @@ class Resident(ResidentNotificationSettingsMixin,
     def approve(self):
         # TODO: send email to the resident
         pass
+
+
+@receiver(pre_save, sender=Resident)
+def set_up(sender, instance, *args, **kwargs):
+    instance.username = instance.email

@@ -27,8 +27,8 @@ class UserTest(TestCase):
 
     def test_full_name(self):
         user = SchedulerFactory.create(
-            first_name='', last_name='', username='username')
-        self.assertEqual(user.full_name, 'username')
+            first_name='', last_name='', email='test@gmail.com')
+        self.assertEqual(user.full_name, 'test@gmail.com')
 
         user = SchedulerFactory.create(
             first_name='first', last_name='')

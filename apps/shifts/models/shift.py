@@ -46,8 +46,10 @@ class Shift(TimestampModelMixin, models.Model):
         verbose_name_plural = 'Shifts'
 
     def __str__(self):
-        return "{0}-{1} {2}".format(
-            self.date_start, self.date_end, self.speciality)
+        return "For {0} from {1} to {2}".format(
+            self.speciality,
+            self.date_start.strftime('%Y-%m-%d %H:%M'),
+            self.date_end.strftime('%Y-%m-%d %H:%M'))
 
     @property
     def is_started(self):

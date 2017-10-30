@@ -21,6 +21,16 @@ class ApplicationStateEnum(object):
     FAILED = 6
     COMPLETED = 7
 
+    CHOICES = (
+        (NEW, 'New'),
+        (APPROVED, 'Approved'),
+        (REJECTED, 'Rejected'),
+        (CONFIRMED, 'Confirmed'),
+        (CANCELLED, 'Cancelled'),
+        (FAILED, 'Failed'),
+        (COMPLETED, 'Completed'),
+    )
+
 
 def can_scheduler_change_application(instance, user):
     return user.is_scheduler and instance.shift.owner == user.scheduler
@@ -73,7 +83,8 @@ class Application(TimestampModelMixin, models.Model):
     )
     state = FSMIntegerField(
         verbose_name='State',
-        default=ApplicationStateEnum.NEW
+        default=ApplicationStateEnum.NEW,
+        choices=ApplicationStateEnum.CHOICES
     )
 
     class Meta:
@@ -81,7 +92,7 @@ class Application(TimestampModelMixin, models.Model):
         verbose_name_plural = 'Applications'
 
     def __str__(self):
-        return "{0} for {1}".format(self.owner, self.shift)
+        return "{0} by {1}".format(self.shift, self.owner)
 
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,

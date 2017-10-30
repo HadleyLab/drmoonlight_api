@@ -33,17 +33,29 @@ SECRET_KEY = 'exk2#v+-54&bux=80=$zpfn8xa8-=2n+s9$ood3ja^i!)!!swo'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG_EMAIL = os.environ.get('DEBUG_EMAIL', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 # EMAIL settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'False') == 'True'
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_EMAIL_FROM', EMAIL_HOST_USER)
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '25'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == "True"
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL", "no-reply@example.com")
+
+POSTMARK_API_KEY = os.environ.get('POSTMARK_API_KEY')
+POSTMARK_SENDER = os.environ.get('POSTMARK_SENDER')
+
+if DEBUG_EMAIL:  # pragma: no cover
+    EMAIL_BACKEND = 'db_email_backend.backend.DBEmailBackend'  # pragma: no cover
+elif POSTMARK_API_KEY:  # pragma: no cover
+    EMAIL_BACKEND = 'postmark.django_backend.EmailBackend'  # pragma: no cover
+    DEFAULT_FROM_EMAIL = POSTMARK_SENDER  # pragma: no cover
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Application definition
 
@@ -69,11 +81,14 @@ THIRD_PARTY_APPS = [
     'django_extensions',
     'django_filters',
     'django_fsm',
+    'fsm_admin',
     'constance',
     'constance.backends.database',
     'raven.contrib.django.raven_compat',
 ]
 
+if DEBUG_EMAIL:
+    THIRD_PARTY_APPS.append('db_email_backend')
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
@@ -138,6 +153,46 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# DRF SETTINGS
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'djangorestframework_camel_case.parser.CamelCaseJSONParser',
+        'djangorestframework_camel_case.parser.CamelCaseFormParser',
+        'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
+    ),
+}
+
+DJOSER = {
+    'DOMAIN': os.environ.get('DJOSER_DOMAIN', 'localhost:8000'),
+    'SITE_NAME': 'SkinIQ',
+    'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
+        # TODO: change this url
+        'DJOSER_PASSWORD_RESET_CONFIRM_URL',
+        '/confirm/{uid}/{token}'),
+    'ACTIVATION_URL': os.environ.get(
+        'DJOSER_ACTIVATION_URL',
+        # TODO: change this url
+        '/activate/{uid}/{token}'),
+    'SEND_ACTIVATION_EMAIL': True,
+    # 'SERIALIZERS': {
+    #     'user_registration': 'apps.accounts.serializers.doctor.RegisterDoctorSerializer',
+    # },
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -163,7 +218,6 @@ STATIC_ROOT = os.path.join(os.path.dirname(PROJECT_ROOT), 'static')
 RAVEN_CONFIG = {
     'dsn': os.environ.get('SENTRY_DSN', '')
 }
-
 
 # LOGGING SETTINGS
 LOGGING = {
@@ -235,3 +289,5 @@ CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 CONSTANCE_CONFIG = {
 
 }
+
+FSM_ADMIN_FORCE_PERMIT = True

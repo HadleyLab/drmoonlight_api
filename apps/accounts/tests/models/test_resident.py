@@ -3,7 +3,7 @@ from django_fsm import has_transition_perm
 
 from apps.accounts.factories import (
     AccountManagerFactory, ResidentFactory, SchedulerFactory)
-from apps.accounts.models import ResidentStateEnum
+from apps.accounts.models import ResidentStateEnum, Resident
 
 
 class ResidentTest(TestCase):
@@ -40,3 +40,9 @@ class ResidentTest(TestCase):
         # Account manager can approve resident
         self.assertTrue(has_transition_perm(
             resident.approve, self.account_manager))
+
+    def test_create(self):
+        resident = Resident.objects.create(
+            first_name='first', last_name='last', email='test@gmail.com')
+        self.assertEqual(resident.email, resident.username)
+        self.assertFalse(resident.is_staff)
