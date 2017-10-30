@@ -87,7 +87,7 @@ THIRD_PARTY_APPS = [
     'raven.contrib.django.raven_compat',
 ]
 
-if DEBUG_EMAIL:
+if DEBUG_EMAIL:  # pragma: no cover
     THIRD_PARTY_APPS.append('db_email_backend')
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
