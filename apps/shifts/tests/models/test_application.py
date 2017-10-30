@@ -1,4 +1,6 @@
+from datetime import timedelta
 from django.test import TestCase
+from django.utils import timezone
 from django_fsm import has_transition_perm
 
 from apps.accounts.factories import ResidentFactory, SchedulerFactory
@@ -62,6 +64,13 @@ class ApplicationTest(TestCase):
         self.assertFalse(has_transition_perm(
             another_application.approve, self.scheduler))
 
+    def test_reject(self):
+        application = ApplicationFactory.create()
+        application.reject()
+        application.save()
+        application.refresh_from_db()
+        self.assertEqual(application.state, ApplicationStateEnum.REJECTED)
+
     def test_reject_permissions(self):
         application = ApplicationFactory.create(
             owner=self.resident, shift=self.shift)
@@ -73,6 +82,14 @@ class ApplicationTest(TestCase):
         # Scheduler can reject own shift's applications
         self.assertTrue(has_transition_perm(
             application.reject, self.scheduler))
+
+    def test_confirm(self):
+        application = ApplicationFactory.create(
+            state=ApplicationStateEnum.APPROVED)
+        application.confirm()
+        application.save()
+        application.refresh_from_db()
+        self.assertEqual(application.state, ApplicationStateEnum.CONFIRMED)
 
     def test_confirm_permissions(self):
         application = ApplicationFactory.create(
@@ -86,6 +103,42 @@ class ApplicationTest(TestCase):
         # Scheduler can't confirm approved applications
         self.assertFalse(has_transition_perm(
             application.confirm, self.scheduler))
+
+    def test_cancel_approved_not_started(self):
+        self.shift.date_start = timezone.now() + timedelta(hours=1)
+        self.shift.save()
+
+        application = ApplicationFactory.create(
+            shift=self.shift,
+            state=ApplicationStateEnum.APPROVED)
+        application.cancel()
+        application.save()
+        application.refresh_from_db()
+        self.assertEqual(application.state, ApplicationStateEnum.CANCELLED)
+
+    def test_cancel_confirmed_not_started(self):
+        self.shift.date_start = timezone.now() + timedelta(hours=1)
+        self.shift.save()
+
+        application = ApplicationFactory.create(
+            shift=self.shift,
+            state=ApplicationStateEnum.CONFIRMED)
+        application.cancel()
+        application.save()
+        application.refresh_from_db()
+        self.assertEqual(application.state, ApplicationStateEnum.FAILED)
+
+    def test_cancel_started(self):
+        self.shift.date_start = timezone.now() - timedelta(hours=1)
+        self.shift.save()
+
+        application = ApplicationFactory.create(
+            shift=self.shift,
+            state=ApplicationStateEnum.APPROVED)
+        application.cancel()
+        application.save()
+        application.refresh_from_db()
+        self.assertEqual(application.state, ApplicationStateEnum.FAILED)
 
     def test_cancel_permissions(self):
         application = ApplicationFactory.create(
@@ -111,6 +164,14 @@ class ApplicationTest(TestCase):
         # Scheduler can cancel confirmed applications
         self.assertTrue(has_transition_perm(
             application.cancel, self.scheduler))
+
+    def test_complete(self):
+        application = ApplicationFactory.create(
+            state=ApplicationStateEnum.CONFIRMED)
+        application.complete()
+        application.save()
+        application.refresh_from_db()
+        self.assertEqual(application.state, ApplicationStateEnum.COMPLETED)
 
     def test_complete_permissions(self):
         application = ApplicationFactory.create(

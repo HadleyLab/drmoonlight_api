@@ -24,3 +24,20 @@ class UserTest(TestCase):
         self.assertFalse(self.resident.is_account_manager)
         self.assertFalse(self.scheduler.is_account_manager)
         self.assertTrue(self.account_manager.is_account_manager)
+
+    def test_full_name(self):
+        user = SchedulerFactory.create(
+            first_name='', last_name='', username='username')
+        self.assertEqual(user.full_name, 'username')
+
+        user = SchedulerFactory.create(
+            first_name='first', last_name='')
+        self.assertEqual(user.full_name, 'first')
+
+        user = SchedulerFactory.create(
+            first_name='', last_name='last')
+        self.assertEqual(user.full_name, 'last')
+
+        user = SchedulerFactory.create(
+            first_name='first', last_name='last')
+        self.assertEqual(user.full_name, 'last first')

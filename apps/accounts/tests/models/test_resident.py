@@ -19,6 +19,14 @@ class ResidentTest(TestCase):
         new_resident.refresh_from_db()
         self.assertEqual(new_resident.state, ResidentStateEnum.PROFILE_FILLED)
 
+    def test_approve(self):
+        resident = ResidentFactory.create(
+            state=ResidentStateEnum.PROFILE_FILLED)
+        resident.approve()
+        resident.save()
+        resident.refresh_from_db()
+        self.assertEqual(resident.state, ResidentStateEnum.APPROVED)
+
     def test_approve_permission(self):
         resident = ResidentFactory.create(
             state=ResidentStateEnum.PROFILE_FILLED)

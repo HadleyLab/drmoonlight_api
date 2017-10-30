@@ -8,7 +8,7 @@ class User(AbstractUser):
     @property
     def full_name(self):
         name = self.last_name + ' ' + self.first_name
-        return name if name != ' ' else self.username
+        return name.strip() if name != ' ' else self.username
 
     @property
     def is_scheduler(self):
