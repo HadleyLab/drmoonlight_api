@@ -20,4 +20,4 @@ class User(AbstractUser):
 
     @property
     def is_account_manager(self):
-        return hasattr(self, 'account_manager')
+        return hasattr(self, 'accountmanager')

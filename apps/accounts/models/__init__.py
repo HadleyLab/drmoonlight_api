@@ -1,6 +1,6 @@
 from .user import User
 from .scheduler import Scheduler
-from .resident import Resident
+from .resident import Resident, ResidentStateEnum
 from .account_manager import AccountManager
 
 from .speciality import Speciality
