@@ -2,6 +2,7 @@ from django.test import TestCase
 
 from apps.accounts.factories import (
     AccountManagerFactory, ResidentFactory, SchedulerFactory)
+from apps.accounts.models import User
 
 
 class UserTest(TestCase):
@@ -41,3 +42,17 @@ class UserTest(TestCase):
         user = SchedulerFactory.create(
             first_name='first', last_name='last')
         self.assertEqual(user.full_name, 'last first')
+
+    def test_create_user(self):
+        user = User.objects.create_user('email@gmail.com', 'qwertyuiop')
+        self.assertEqual(user.email, 'email@gmail.com')
+        self.assertTrue(user.check_password('qwertyuiop'))
+        self.assertFalse(user.is_superuser)
+        self.assertFalse(user.is_staff)
+
+    def test_create_superuser(self):
+        user = User.objects.create_superuser('email@gmail.com', 'qwertyuiop')
+        self.assertEqual(user.email, 'email@gmail.com')
+        self.assertTrue(user.check_password('qwertyuiop'))
+        self.assertTrue(user.is_superuser)
+        self.assertTrue(user.is_staff)

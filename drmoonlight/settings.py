@@ -77,6 +77,7 @@ PROJECT_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
+    'djoser',
     'storages',
     'django_extensions',
     'django_filters',

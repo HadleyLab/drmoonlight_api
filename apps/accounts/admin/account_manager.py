@@ -1,9 +1,12 @@
-from django.contrib.auth.admin import UserAdmin
+from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
+from apps.accounts.models import AccountManager
+from .user import UserAdmin
 
+
+@admin.register(AccountManager)
 class AccountManagerAdmin(UserAdmin):
-    list_display = ('pk', 'full_name', 'is_active', )
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name', )}),

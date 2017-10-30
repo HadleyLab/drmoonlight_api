@@ -1,8 +1,12 @@
-from django.contrib.auth.admin import UserAdmin
-from fsm_admin.mixins import FSMTransitionMixin
 from django.utils.translation import ugettext_lazy as _
+from django.contrib import admin
+from fsm_admin.mixins import FSMTransitionMixin
+
+from apps.accounts.models import Resident
+from .user import UserAdmin
 
 
+@admin.register(Resident)
 class ResidentAdmin(FSMTransitionMixin, UserAdmin):
     list_display = ('pk', 'full_name', 'is_active', 'state', )
     readonly_fields = ('state', )

@@ -1,8 +1,6 @@
 from django.db import models
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 
-from .user import User
+from .user import User, UserManager
 
 
 class Scheduler(User):
@@ -15,12 +13,8 @@ class Scheduler(User):
         max_length=255
     )
 
+    objects = UserManager()
+
     class Meta:
         verbose_name = 'Scheduler'
         verbose_name_plural = 'Schedulers'
-
-
-@receiver(pre_save, sender=Scheduler)
-def set_up(sender, instance, *args, **kwargs):
-    instance.is_staff = True
-    instance.username = instance.email

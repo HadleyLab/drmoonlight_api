@@ -44,5 +44,4 @@ class ResidentTest(TestCase):
     def test_create(self):
         resident = Resident.objects.create(
             first_name='first', last_name='last', email='test@gmail.com')
-        self.assertEqual(resident.email, resident.username)
         self.assertFalse(resident.is_staff)

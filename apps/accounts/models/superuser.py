@@ -1,11 +1,10 @@
-from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from .user import User
+from .user import User, UserManager
 
 
-class SuperUserManager(models.Manager):
+class SuperUserManager(UserManager):
     def get_queryset(self):
         return super(SuperUserManager, self).get_queryset() \
             .filter(is_superuser=True)
@@ -24,4 +23,3 @@ class SuperUser(User):
 def set_up(sender, instance, *args, **kwargs):
     instance.is_staff = True
     instance.is_superuser = True
-    instance.username = instance.email

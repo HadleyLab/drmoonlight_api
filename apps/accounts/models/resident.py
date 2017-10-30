@@ -1,9 +1,7 @@
 from django.db import models
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from django_fsm import FSMIntegerField, transition
 
-from .user import User
+from .user import User, UserManager
 from .speciality import Speciality
 from .residency_program import ResidencyProgram
 
@@ -115,6 +113,8 @@ class Resident(ResidentNotificationSettingsMixin,
         choices=ResidentStateEnum.CHOICES
     )
 
+    objects = UserManager()
+
     class Meta:
         verbose_name = 'Resident'
         verbose_name_plural = 'Residents'
@@ -140,8 +140,3 @@ class Resident(ResidentNotificationSettingsMixin,
     def approve(self):
         # TODO: send email to the resident
         pass
-
-
-@receiver(pre_save, sender=Resident)
-def set_up(sender, instance, *args, **kwargs):
-    instance.username = instance.email
