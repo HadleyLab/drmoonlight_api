@@ -1,0 +1,1 @@
+from .resident import ResidentPermission
