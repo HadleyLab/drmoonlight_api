@@ -31,19 +31,15 @@ class ResidentTestCase(APITestCase):
         self.assertEqual(resident.last_name, data['last_name'])
         self.assertTrue(resident.check_password(data['password']))
 
-    def test_me_bt_resident_success(self):
+    def test_retrieve_myself_by_resident_failed(self):
         self.authenticate_as_resident()
-        resp = self.client.get('/api/accounts/resident/me/')
+        resp = self.client.get('/api/accounts/resident/{0}/'.format(
+            self.resident.pk))
         self.assertSuccessResponse(resp)
-        self.assertEqual(resp.data['pk'], self.resident.pk)
 
-    def test_me_bt_not_resident_failed(self):
-        self.authenticate_as_scheduler()
-        resp = self.client.get('/api/accounts/resident/me/')
-        self.assertForbidden(resp)
-
-    def test_retrieve_by_resident_failed(self):
-        self.authenticate_as_resident()
+    def test_retrieve_not_myself_by_resident_failed(self):
+        resident = ResidentFactory.create()
+        self.authenticate_as_resident(resident)
         resp = self.client.get('/api/accounts/resident/{0}/'.format(
             self.resident.pk))
         self.assertForbidden(resp)

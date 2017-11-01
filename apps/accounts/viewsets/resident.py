@@ -34,10 +34,3 @@ class ResidentViewSet(mixins.CreateModelMixin,
         context = {'user': user}
         to = [get_user_email(user)]
         email.ActivationEmail(self.request, context).send(to)
-
-    @list_route(methods=['GET'])
-    def me(self, request, *args, **kwargs):
-        instance = request.user.resident
-
-        serializer = self.get_serializer(instance)
-        return response.Response(serializer.data)
