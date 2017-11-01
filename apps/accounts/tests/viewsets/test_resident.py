@@ -1,4 +1,5 @@
-from apps.accounts.factories import ResidentFactory
+from apps.accounts.factories import ResidentFactory, SpecialityFactory, \
+    ResidencyProgramFactory
 from apps.accounts.models import Resident
 from apps.main.tests import APITestCase
 
@@ -29,3 +30,62 @@ class ResidentTestCase(APITestCase):
         self.assertEqual(resident.first_name, data['first_name'])
         self.assertEqual(resident.last_name, data['last_name'])
         self.assertTrue(resident.check_password(data['password']))
+
+    def test_me_bt_resident_success(self):
+        self.authenticate_as_resident()
+        resp = self.client.get('/api/accounts/resident/me/')
+        self.assertSuccessResponse(resp)
+        self.assertEqual(resp.data['pk'], self.resident.pk)
+
+    def test_me_bt_not_resident_failed(self):
+        self.authenticate_as_scheduler()
+        resp = self.client.get('/api/accounts/resident/me/')
+        self.assertForbidden(resp)
+
+    def test_retrieve_by_resident_failed(self):
+        self.authenticate_as_resident()
+        resp = self.client.get('/api/accounts/resident/{0}/'.format(
+            self.resident.pk))
+        self.assertForbidden(resp)
+
+    def test_retrieve_by_scheduler_failed(self):
+        self.authenticate_as_scheduler()
+        resp = self.client.get('/api/accounts/resident/{0}/'.format(
+            self.resident.pk))
+        self.assertForbidden(resp)
+
+    def test_retrieve_by_account_manager_success(self):
+        self.authenticate_as_account_manager()
+        resp = self.client.get('/api/accounts/resident/{0}/'.format(
+            self.resident.pk))
+        self.assertSuccessResponse(resp)
+
+    def test_update_by_account_manager_failed(self):
+        self.authenticate_as_account_manager()
+        resp = self.client.patch('/api/accounts/resident/{0}/'.format(
+            self.resident.pk))
+        self.assertForbidden(resp)
+
+    def test_update_by_scheduler_failed(self):
+        self.authenticate_as_scheduler()
+        resp = self.client.patch('/api/accounts/resident/{0}/'.format(
+            self.resident.pk))
+        self.assertForbidden(resp)
+
+    def test_update_not_self_by_resident_failed(self):
+        resident = ResidentFactory.create()
+        self.authenticate_as_resident(resident)
+        resp = self.client.patch('/api/accounts/resident/{0}/'.format(
+            self.resident.pk))
+        self.assertForbidden(resp)
+
+    def test_update_myself_by_resident_success(self):
+        self.authenticate_as_resident()
+        data = {
+            'specialities': [SpecialityFactory.create().pk, ],
+            'residency_program': ResidencyProgramFactory.create().pk,
+            'residency_year': 2017,
+        }
+        resp = self.client.patch('/api/accounts/resident/{0}/'.format(
+            self.resident.pk), format='json')
+        self.assertSuccessResponse(resp)

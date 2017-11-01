@@ -38,7 +38,6 @@ class ResidentViewSet(mixins.CreateModelMixin,
     @list_route(methods=['GET'])
     def me(self, request, *args, **kwargs):
         instance = request.user.resident
-        self.check_object_permissions(request, instance)
 
         serializer = self.get_serializer(instance)
         return response.Response(serializer.data)

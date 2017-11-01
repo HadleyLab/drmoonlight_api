@@ -1,7 +1,8 @@
 from rest_framework.test import APITestCase as BaseAPITestCase
 from rest_framework import status
 
-from apps.accounts.factories import SchedulerFactory, ResidentFactory
+from apps.accounts.factories import (
+    SchedulerFactory, ResidentFactory, AccountManagerFactory)
 
 
 class APITestCase(BaseAPITestCase):
@@ -10,6 +11,7 @@ class APITestCase(BaseAPITestCase):
 
         self.scheduler = SchedulerFactory(password='password')
         self.resident = ResidentFactory(password='password')
+        self.account_manager = AccountManagerFactory(password='password')
 
     def assertSuccessResponse(self, resp):
         if resp.status_code not in range(200, 300):
@@ -56,6 +58,15 @@ class APITestCase(BaseAPITestCase):
         if resident is None:
             resident = self.resident
         token = self.create_token(resident)
+        self.assertIsNotNone(token)
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token {0}'.format(token)
+        )
+
+    def authenticate_as_account_manager(self, account_manager=None):
+        if account_manager is None:
+            account_manager = self.account_manager
+        token = self.create_token(account_manager)
         self.assertIsNotNone(token)
         self.client.credentials(
             HTTP_AUTHORIZATION='Token {0}'.format(token)

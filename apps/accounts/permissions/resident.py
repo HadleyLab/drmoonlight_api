@@ -6,6 +6,13 @@ class ResidentPermission(BasePermission):
         if view.action == 'create':
             return True
 
+        if view.action == 'me':
+            return request.user.is_resident
+
+        # These actions are handled in has_object_permission
+        if view.action in ['retrieve', 'partial_update', 'update']:
+            return True
+
         return False
 
     def has_object_permission(self, request, view, obj):
@@ -13,9 +20,6 @@ class ResidentPermission(BasePermission):
             return request.user.is_account_manager
 
         if view.action in ['partial_update', 'update']:
-            return request.user == obj.user
-
-        if view.action == 'me':
-            return request.user == obj.user
+            return request.user == obj.user_ptr
 
         return False
