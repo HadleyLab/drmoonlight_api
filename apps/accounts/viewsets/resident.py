@@ -6,8 +6,10 @@ from apps.accounts.models import Resident
 from apps.accounts.permissions import ResidentPermission
 from apps.accounts.serializers import (
     ResidentCreateSerializer, ResidentListSerializer)
+from apps.main.viewsets import add_transition_actions
 
 
+@add_transition_actions
 class ResidentViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     serializer_class = ResidentListSerializer
     queryset = Resident.objects.all()
