@@ -52,6 +52,11 @@ def create_structure():
         def a_to_c(self):
             pass
 
+        @transition(field=state, source='c', target='d', custom={
+            'viewset': False})
+        def c_to_d(self):
+            pass
+
     class NormalFSMModelSerializers(serializers.ModelSerializer):
         class Meta:
             model = NormalFSM
@@ -83,3 +88,4 @@ class AddTransitionActionsDecorator(TestCase):
         self.assertTrue(callable(NewViewSet.a_to_b))
         self.assertTrue(callable(NewViewSet.b_to_c))
         self.assertTrue(callable(NewViewSet.a_to_c))
+        self.assertFalse(hasattr(NewViewSet, 'c_to_d'))

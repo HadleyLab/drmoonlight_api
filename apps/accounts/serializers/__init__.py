@@ -1,1 +1,2 @@
-from .resident import ResidentListSerializer, ResidentCreateSerializer
+from .resident import (
+    ResidentSerializer, ResidentCreateSerializer, ResidentUpdateSerializer)

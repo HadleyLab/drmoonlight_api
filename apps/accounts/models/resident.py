@@ -125,9 +125,7 @@ class Resident(ResidentNotificationSettingsMixin,
         field=state,
         source=ResidentStateEnum.NEW,
         target=ResidentStateEnum.PROFILE_FILLED,
-        custom=dict(admin=True)
-        # TODO: Discuss with Ilya. This method can't be called via API
-        # It is internal method which should be called in profile change view
+        custom=dict(admin=True, viewset=False)
     )
     def fill_profile(self):
         # TODO: send email to the managing editor

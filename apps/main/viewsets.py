@@ -25,6 +25,11 @@ def add_transition_actions(Klass):
     method_name = "get_all_{0}_transitions".format(fsm_fields[0])
 
     for f in getattr(Model, method_name)(Model()):
+        # Skip methods which explicitly excluded via using `viewset=False`
+        # in custom attr
+        if not f.custom.get('viewset', True):
+            continue
+
         def get_fn(name_):
             name = copy(name_)
 
