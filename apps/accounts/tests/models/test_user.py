@@ -43,6 +43,10 @@ class UserTest(TestCase):
             first_name='first', last_name='last')
         self.assertEqual(user.full_name, 'last first')
 
+    def test_create_user_raises_value_error_in_email_is_not_specified(self):
+        with self.assertRaises(ValueError):
+            User.objects.create_user('', 'qwertyuiop')
+
     def test_create_user(self):
         user = User.objects.create_user('email@gmail.com', 'qwertyuiop')
         self.assertEqual(user.email, 'email@gmail.com')
@@ -56,3 +60,13 @@ class UserTest(TestCase):
         self.assertTrue(user.check_password('qwertyuiop'))
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
+
+    def test_create_superuser_raises_value_error_for_false_is_staff(self):
+        with self.assertRaises(ValueError):
+            User.objects.create_superuser(
+                'email@gmail.com', 'qwertyuiop', is_staff=False)
+
+    def test_create_superuser_raises_value_error_for_false_is_superuser(self):
+        with self.assertRaises(ValueError):
+            User.objects.create_superuser(
+                'email@gmail.com', 'qwertyuiop', is_superuser=False)

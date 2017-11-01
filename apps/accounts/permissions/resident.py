@@ -13,7 +13,7 @@ class ResidentPermission(BasePermission):
         if view.action in ['retrieve', 'partial_update', 'update']:
             return True
 
-        return False
+        return False  # pragma: no cover
 
     def has_object_permission(self, request, view, obj):
         if view.action == 'retrieve':
@@ -22,4 +22,4 @@ class ResidentPermission(BasePermission):
         if view.action in ['partial_update', 'update']:
             return request.user == obj.user_ptr
 
-        return False
+        return False  # pragma: no cover
