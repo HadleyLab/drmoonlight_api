@@ -41,6 +41,28 @@ class ResidentTest(TestCase):
         self.assertTrue(has_transition_perm(
             resident.approve, self.account_manager))
 
+    def test_reject(self):
+        resident = ResidentFactory.create(
+            state=ResidentStateEnum.PROFILE_FILLED)
+        resident.reject()
+        resident.save()
+        resident.refresh_from_db()
+        self.assertEqual(resident.state, ResidentStateEnum.REJECTED)
+
+    def test_reject_permission(self):
+        resident = ResidentFactory.create(
+            state=ResidentStateEnum.PROFILE_FILLED)
+
+        # Scheduler (not account manager) can't approve resident
+        scheduler = SchedulerFactory.create()
+
+        self.assertFalse(has_transition_perm(
+            resident.reject, scheduler))
+
+        # Account manager can approve resident
+        self.assertTrue(has_transition_perm(
+            resident.reject, self.account_manager))
+
     def test_create(self):
         resident = Resident.objects.create(
             first_name='first', last_name='last', email='test@gmail.com')

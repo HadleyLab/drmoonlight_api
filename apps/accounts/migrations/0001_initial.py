@@ -94,7 +94,7 @@ class Migration(migrations.Migration):
                 ('notification_application_status_changing', models.BooleanField(default=True, verbose_name='Notify about an application status changing')),
                 ('notification_new_messages', models.BooleanField(default=True, verbose_name='Notify about new messages')),
                 ('residency_year', models.PositiveIntegerField(blank=True, null=True, verbose_name='Residency year')),
-                ('state', django_fsm.FSMIntegerField(choices=[(1, 'New'), (2, 'Profile filled'), (3, 'Approved')], default=1, verbose_name='State')),
+                ('state', django_fsm.FSMIntegerField(choices=[(1, 'New'), (2, 'Profile filled'), (3, 'Approved'), (4, 'Rejected')], default=1, verbose_name='State')),
                 ('residency_program', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='accounts.ResidencyProgram', verbose_name='Residency program')),
                 ('specialities', models.ManyToManyField(blank=True, to='accounts.Speciality', verbose_name='Specialities')),
             ],

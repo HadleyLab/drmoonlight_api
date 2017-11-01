@@ -79,11 +79,13 @@ class ResidentStateEnum(object):
     NEW = 1
     PROFILE_FILLED = 2
     APPROVED = 3
+    REJECTED = 4
 
     CHOICES = (
         (NEW, 'New'),
         (PROFILE_FILLED, 'Profile filled'),
         (APPROVED, 'Approved'),
+        (REJECTED, 'Rejected'),
     )
 
 
@@ -138,5 +140,15 @@ class Resident(ResidentNotificationSettingsMixin,
         permission=is_account_manager
     )
     def approve(self):
+        # TODO: send email to the resident
+        pass
+
+    @transition(
+        field=state,
+        source=ResidentStateEnum.PROFILE_FILLED,
+        target=ResidentStateEnum.REJECTED,
+        permission=is_account_manager
+    )
+    def reject(self):
         # TODO: send email to the resident
         pass
