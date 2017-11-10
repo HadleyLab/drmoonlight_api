@@ -31,7 +31,7 @@ class ResidentTestCase(APITestCase):
         self.assertEqual(resident.last_name, data['last_name'])
         self.assertTrue(resident.check_password(data['password']))
 
-    def test_retrieve_myself_by_resident_failed(self):
+    def test_retrieve_myself_by_resident_success(self):
         self.authenticate_as_resident()
         resp = self.client.get('/api/accounts/resident/{0}/'.format(
             self.resident.pk))
@@ -83,5 +83,38 @@ class ResidentTestCase(APITestCase):
             'residency_year': 2017,
         }
         resp = self.client.patch('/api/accounts/resident/{0}/'.format(
-            self.resident.pk), format='json')
+            self.resident.pk), data, format='json')
         self.assertSuccessResponse(resp)
+
+        self.resident.refresh_from_db()
+        self.assertSetEqual(
+            set(self.resident.specialities.values_list('pk', flat=True)),
+            set(data['specialities']))
+        self.assertEqual(
+            self.resident.residency_program.pk,
+            data['residency_program'])
+        self.assertEqual(self.resident.residency_year, data['residency_year'])
+
+    def test_fill_profile_by_resident_success(self):
+        self.authenticate_as_resident()
+        data = {
+            'specialities': [SpecialityFactory.create().pk, ],
+            'residency_program': ResidencyProgramFactory.create().pk,
+            'residency_year': 2017,
+        }
+        resp = self.client.post(
+            '/api/accounts/resident/{0}/fill_profile/'.format(
+                self.resident.pk),
+            data, format='json')
+        self.assertSuccessResponse(resp)
+        self.resident.refresh_from_db()
+        self.assertSetEqual(
+            set(self.resident.specialities.values_list('pk', flat=True)),
+            set(data['specialities']))
+        self.assertEqual(
+            self.resident.residency_program.pk,
+            data['residency_program'])
+        self.assertEqual(self.resident.residency_year, data['residency_year'])
+
+        # TODO: check that email sent
+

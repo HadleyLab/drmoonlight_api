@@ -1,16 +1,17 @@
 from djoser import email
 from djoser.compat import get_user_email
-from rest_framework import viewsets, mixins, response
-from rest_framework.decorators import list_route
+from rest_framework import viewsets, mixins, serializers
 
 from apps.accounts.models import Resident
 from apps.accounts.permissions import ResidentPermission
 from apps.accounts.serializers import (
-    ResidentCreateSerializer, ResidentUpdateSerializer, ResidentSerializer)
+    ResidentCreateSerializer, ResidentUpdateSerializer,
+    ResidentFillProfileSerializer, ResidentSerializer)
 from apps.main.viewsets import add_transition_actions
 
 
-@add_transition_actions
+@add_transition_actions(serializers={
+    'fill_profile': ResidentFillProfileSerializer})
 class ResidentViewSet(mixins.CreateModelMixin,
                       mixins.UpdateModelMixin,
                       mixins.RetrieveModelMixin,

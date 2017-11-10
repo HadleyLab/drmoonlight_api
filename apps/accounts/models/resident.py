@@ -93,6 +93,10 @@ def is_account_manager(instance, user):
     return user.is_account_manager
 
 
+def is_resident(instance, user):
+    return user.is_resident and instance.user_ptr == user
+
+
 class Resident(ResidentNotificationSettingsMixin,
                ResidentProfileSettingsMixin, User):
     specialities = models.ManyToManyField(
@@ -123,13 +127,15 @@ class Resident(ResidentNotificationSettingsMixin,
 
     @transition(
         field=state,
-        source=ResidentStateEnum.NEW,
+        source=[ResidentStateEnum.NEW, ResidentStateEnum.REJECTED],
         target=ResidentStateEnum.PROFILE_FILLED,
-        custom=dict(admin=True, viewset=False)
+        permission=is_resident
     )
-    def fill_profile(self):
+    def fill_profile(self, **profile_data):
+        for field, value in profile_data.items():
+            setattr(self, field, value)
+
         # TODO: send email to the managing editor
-        pass
 
     @transition(
         field=state,

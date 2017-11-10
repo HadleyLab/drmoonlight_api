@@ -1,2 +1,3 @@
 from .resident import (
-    ResidentSerializer, ResidentCreateSerializer, ResidentUpdateSerializer)
+    ResidentSerializer, ResidentCreateSerializer, ResidentUpdateSerializer,
+    ResidentFillProfileSerializer)
