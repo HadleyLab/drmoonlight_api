@@ -1,6 +1,6 @@
 from apps.accounts.factories import ResidentFactory, SpecialityFactory, \
     ResidencyProgramFactory
-from apps.accounts.models import Resident
+from apps.accounts.models import Resident, ResidentStateEnum
 from apps.main.tests import APITestCase
 
 
@@ -108,6 +108,10 @@ class ResidentTestCase(APITestCase):
             data, format='json')
         self.assertSuccessResponse(resp)
         self.resident.refresh_from_db()
+
+        self.assertEqual(
+            self.resident.state,
+            ResidentStateEnum.PROFILE_FILLED)
         self.assertSetEqual(
             set(self.resident.specialities.values_list('pk', flat=True)),
             set(data['specialities']))
@@ -118,3 +122,30 @@ class ResidentTestCase(APITestCase):
 
         # TODO: check that email sent
 
+    def test_approve_by_account_manager_success(self):
+        self.resident.state = ResidentStateEnum.PROFILE_FILLED
+        self.resident.save(update_fields=['state'])
+
+        self.authenticate_as_account_manager()
+        resp = self.client.post(
+            '/api/accounts/resident/{0}/approve/'.format(self.resident.pk))
+        self.assertSuccessResponse(resp)
+
+        self.resident.refresh_from_db()
+        self.assertEqual(self.resident.state, ResidentStateEnum.APPROVED)
+
+        # TODO: check that email sent
+
+    def test_reject_by_account_manager_success(self):
+        self.resident.state = ResidentStateEnum.PROFILE_FILLED
+        self.resident.save(update_fields=['state'])
+
+        self.authenticate_as_account_manager()
+        resp = self.client.post(
+            '/api/accounts/resident/{0}/reject/'.format(self.resident.pk))
+        self.assertSuccessResponse(resp)
+
+        self.resident.refresh_from_db()
+        self.assertEqual(self.resident.state, ResidentStateEnum.REJECTED)
+
+        # TODO: check that email sent

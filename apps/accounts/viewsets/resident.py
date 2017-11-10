@@ -1,6 +1,6 @@
 from djoser import email
 from djoser.compat import get_user_email
-from rest_framework import viewsets, mixins, serializers
+from rest_framework import viewsets, mixins
 
 from apps.accounts.models import Resident
 from apps.accounts.permissions import ResidentPermission
