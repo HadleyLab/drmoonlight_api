@@ -1,5 +1,5 @@
 from copy import copy
-from functools import wraps
+import inspect
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
@@ -12,6 +12,57 @@ from django_fsm import (
     can_proceed, has_transition_perm, FSMFieldMixin, TransitionNotAllowed, )
 
 
+def get_view_fn(name_):
+    name = copy(name_)
+
+    @transaction.atomic
+    def fn(self, request, **kwargs):
+        transition_args = []
+
+        if self.get_serializer_class() != Serializer:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            transition_args = [serializer.validated_data]
+
+        obj = self.get_object()
+        transition = getattr(obj, name)
+
+        if can_proceed(transition) and \
+                has_transition_perm(transition, request.user):
+            try:
+                transition(*transition_args)
+            except TransitionNotAllowed as err:
+                raise ValidationError(str(err))
+            obj.save()
+            return Response(status=204)
+        else:
+            raise ValidationError(
+                "Can't perform '{}' transition".format(name))
+
+    return fn
+
+
+def check_args(f, serializer_class):
+    transition_argspec = inspect.getfullargspec(
+        f.method)
+    transition_argcount = len(transition_argspec.args)
+
+    if transition_argcount == 1 and serializer_class:
+        raise ImproperlyConfigured(
+            "Transition '{0}' doesn't receive an additional argument "
+            "but serializer is specified".format(f.name))
+
+    if transition_argcount > 1 and not serializer_class:
+        raise ImproperlyConfigured(
+            "Transition '{0}' receives an additional argument "
+            "but serializer is not specified".format(f.name))
+
+    if transition_argcount > 2:
+        raise ImproperlyConfigured(
+            "Transition '{0}' receives arguments which "
+            "can't be provided".format(f.name))
+
+
 def add_transition_actions(*decorator_args, **decorator_kwargs):
     serializers = decorator_kwargs.get('serializers', {})
 
@@ -21,11 +72,11 @@ def add_transition_actions(*decorator_args, **decorator_kwargs):
                       if isinstance(f, FSMFieldMixin)]
         if len(fsm_fields) == 0:
             raise ImproperlyConfigured(
-                "There is no FSM field at {0}".format(Model))
+                "There is no FSM field at '{0}'".format(Model))
 
         if len(fsm_fields) > 1:
             raise ImproperlyConfigured(
-                "There is more than one FSM field at {0}".format(Model))
+                "There is more than one FSM field at '{0}'".format(Model))
 
         method_name = "get_all_{0}_transitions".format(fsm_fields[0])
 
@@ -35,35 +86,19 @@ def add_transition_actions(*decorator_args, **decorator_kwargs):
             if not f.custom.get('viewset', True):
                 continue
 
-            def get_fn(name_):
-                name = copy(name_)
+            serializer_class = serializers.get(f.name, None)
+            check_args(f, serializer_class)
 
-                @transaction.atomic
-                def fn(self, request, **kwargs):
-                    args = self.get_serializer(data=request.data)
-                    args.is_valid(raise_exception=True)
-                    obj = self.get_object()
-                    transition = getattr(obj, name)
-                    if can_proceed(transition) and \
-                            has_transition_perm(transition, request.user):
-                        try:
-                            transition(**args.validated_data)
-                        except TransitionNotAllowed as err:
-                            raise ValidationError(str(err))
-                        obj.save()
-                        return Response(status=204)
-                    else:
-                        raise ValidationError(
-                            "You cant perform '{}' transition".format(name))
-                return fn
-
-            serializer_class = serializers.get(f.name, Serializer)
+            if not serializer_class:
+                # Use an empty serializer for the transition
+                # without data argument
+                serializer_class = Serializer
 
             setattr(Klass, f.name, detail_route(
                 methods=['post'],
                 # Skip permissions because transition has owns
                 permission_classes=(),
-                serializer_class=serializer_class)(get_fn(f.name)))
+                serializer_class=serializer_class)(get_view_fn(f.name)))
         return Klass
 
     # Add an ability to use decorator without arguments

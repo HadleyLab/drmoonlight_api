@@ -14,7 +14,7 @@ class ResidentTest(TestCase):
 
     def test_fill_profile(self):
         new_resident = ResidentFactory.create()
-        new_resident.fill_profile()
+        new_resident.fill_profile({})
         new_resident.save()
         new_resident.refresh_from_db()
         self.assertEqual(new_resident.state, ResidentStateEnum.PROFILE_FILLED)

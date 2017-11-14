@@ -131,7 +131,7 @@ class Resident(ResidentNotificationSettingsMixin,
         target=ResidentStateEnum.PROFILE_FILLED,
         permission=is_resident
     )
-    def fill_profile(self, **profile_data):
+    def fill_profile(self, profile_data):
         for field, value in profile_data.items():
             setattr(self, field, value)
 
