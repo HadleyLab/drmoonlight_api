@@ -37,7 +37,7 @@ class ApplicationTest(TestCase):
 
         second_application.refresh_from_db()
         self.assertEqual(
-            second_application.state, ApplicationStateEnum.REJECTED)
+            second_application.state, ApplicationStateEnum.POSTPONED)
 
         cancelled_application.refresh_from_db()
         self.assertEqual(
@@ -105,8 +105,20 @@ class ApplicationTest(TestCase):
             application.confirm, self.scheduler))
 
     def test_cancel_approved_not_started(self):
+        """
+        Checks that cancelling an application for the not started shift
+        makes the application cancelled and renews all postponed applications
+        """
         self.shift.date_start = timezone.now() + timedelta(hours=1)
         self.shift.save()
+
+        another_shift_postponed_application = ApplicationFactory(
+            state=ApplicationStateEnum.POSTPONED
+        )
+        postponed_application = ApplicationFactory.create(
+            shift=self.shift,
+            state=ApplicationStateEnum.POSTPONED
+        )
 
         application = ApplicationFactory.create(
             shift=self.shift,
@@ -116,9 +128,26 @@ class ApplicationTest(TestCase):
         application.refresh_from_db()
         self.assertEqual(application.state, ApplicationStateEnum.CANCELLED)
 
+        postponed_application.refresh_from_db()
+        self.assertEqual(postponed_application.state, ApplicationStateEnum.NEW)
+
+        another_shift_postponed_application.refresh_from_db()
+        self.assertEqual(
+            another_shift_postponed_application.state,
+            ApplicationStateEnum.POSTPONED)
+
     def test_cancel_confirmed_not_started(self):
+        """
+        Checks that cancelling an application for the not started shift
+        makes the application failed and renews all postponed applications
+        """
         self.shift.date_start = timezone.now() + timedelta(hours=1)
         self.shift.save()
+
+        postponed_application = ApplicationFactory.create(
+            shift=self.shift,
+            state=ApplicationStateEnum.POSTPONED
+        )
 
         application = ApplicationFactory.create(
             shift=self.shift,
@@ -128,9 +157,22 @@ class ApplicationTest(TestCase):
         application.refresh_from_db()
         self.assertEqual(application.state, ApplicationStateEnum.FAILED)
 
+        postponed_application.refresh_from_db()
+        self.assertEqual(postponed_application.state, ApplicationStateEnum.NEW)
+
     def test_cancel_started(self):
+        """
+        Checks that cancelling an application for the started shift
+        makes the application failed and doesn't renew all postponed
+        applications
+        """
         self.shift.date_start = timezone.now() - timedelta(hours=1)
         self.shift.save()
+
+        postponed_application = ApplicationFactory.create(
+            shift=self.shift,
+            state=ApplicationStateEnum.POSTPONED
+        )
 
         application = ApplicationFactory.create(
             shift=self.shift,
@@ -139,6 +181,9 @@ class ApplicationTest(TestCase):
         application.save()
         application.refresh_from_db()
         self.assertEqual(application.state, ApplicationStateEnum.FAILED)
+
+        postponed_application.refresh_from_db()
+        self.assertEqual(postponed_application.state, ApplicationStateEnum.POSTPONED)
 
     def test_cancel_permissions(self):
         application = ApplicationFactory.create(
