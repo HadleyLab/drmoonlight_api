@@ -7,7 +7,7 @@ from .user import UserCreateSerializer
 class ResidentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resident
-        fields = ('pk', 'email', 'state', )
+        fields = ('pk', 'email', 'first_name', 'last_name', 'state', )
 
 
 class ResidentCreateSerializer(UserCreateSerializer):
@@ -21,8 +21,8 @@ class ResidentUpdateSerializer(serializers.ModelSerializer):
         model = Resident
         fields = (
             # Required fields
-            'pk', 'email', 'residency_program', 'residency_year',
-            'specialities',
+            'pk', 'email', 'first_name', 'last_name',  'residency_program',
+            'residency_year', 'specialities',
 
             # Not required fields
             'earliest_availability_for_shift', 'preferences_for_work_location',

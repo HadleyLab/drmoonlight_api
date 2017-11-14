@@ -1,31 +1,27 @@
 from djoser import email
 from djoser.compat import get_user_email
-from rest_framework import viewsets, mixins, serializers
+from rest_framework import viewsets, mixins
 
-from apps.accounts.models import Resident
-from apps.accounts.permissions import ResidentPermission
+from apps.accounts.models import Scheduler
+from apps.accounts.permissions import SchedulerPermission
 from apps.accounts.serializers import (
-    ResidentCreateSerializer, ResidentUpdateSerializer,
-    ResidentFillProfileSerializer, ResidentSerializer)
-from apps.main.viewsets import add_transition_actions
+    SchedulerCreateSerializer, SchedulerUpdateSerializer, SchedulerSerializer)
 
 
-@add_transition_actions(serializers={
-    'fill_profile': ResidentFillProfileSerializer})
-class ResidentViewSet(mixins.CreateModelMixin,
+class SchedulerViewSet(mixins.CreateModelMixin,
                       mixins.UpdateModelMixin,
                       mixins.RetrieveModelMixin,
                       viewsets.GenericViewSet):
-    serializer_class = ResidentSerializer
-    queryset = Resident.objects.all()
-    permission_classes = [ResidentPermission, ]
+    serializer_class = SchedulerSerializer
+    queryset = Scheduler.objects.all()
+    permission_classes = [SchedulerPermission, ]
 
     def get_serializer_class(self):
         if self.action == 'create':
-            return ResidentCreateSerializer
+            return SchedulerCreateSerializer
 
         if self.action in ['update', 'partial_update']:
-            return ResidentUpdateSerializer
+            return SchedulerUpdateSerializer
 
         return self.serializer_class
 

@@ -119,7 +119,9 @@ class AddTransitionActionsDecorator(TestCase):
             serializer_class = FSMWithTwoArgsModelSerializers()
 
         with self.assertRaises(ImproperlyConfigured):
-            add_transition_actions(FSMWithTwoArgsModelViewSet)
+            add_transition_actions(
+                serializers={'a_to_b': serializers.Serializer}
+            )(FSMWithTwoArgsModelViewSet)
 
     def test_that_for_viewset_without_exactly_one_fsm_action_creates(self):
         NewViewSet = add_transition_actions(NormalFSMModelViewSet)
