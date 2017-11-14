@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date_created', models.DateTimeField(auto_now_add=True, verbose_name='Date created')),
                 ('date_modified', models.DateTimeField(auto_now=True, verbose_name='Date modified')),
-                ('state', django_fsm.FSMIntegerField(choices=[(1, 'New'), (2, 'Approved'), (3, 'Rejected'), (4, 'Confirmed'), (5, 'Cancelled'), (6, 'Failed'), (7, 'Completed')], default=1, verbose_name='State')),
+                ('state', django_fsm.FSMIntegerField(choices=[(1, 'New'), (2, 'Approved'), (3, 'Rejected'), (4, 'Postponed'), (5, 'Confirmed'), (6, 'Cancelled'), (7, 'Failed'), (8, 'Completed')], default=1, verbose_name='State')),
                 ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='applications', to='accounts.Resident', verbose_name='Owner')),
             ],
             options={

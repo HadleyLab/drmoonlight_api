@@ -12,19 +12,21 @@ class ApplicationStateEnum(object):
     # First stage
     APPROVED = 2
     REJECTED = 3
+    POSTPONED = 4
 
     # Second stage
-    CONFIRMED = 4
-    CANCELLED = 5
+    CONFIRMED = 5
+    CANCELLED = 6
 
     # Third stage
-    FAILED = 6
-    COMPLETED = 7
+    FAILED = 7
+    COMPLETED = 8
 
     CHOICES = (
         (NEW, 'New'),
         (APPROVED, 'Approved'),
         (REJECTED, 'Rejected'),
+        (POSTPONED, 'Postponed'),
         (CONFIRMED, 'Confirmed'),
         (CANCELLED, 'Cancelled'),
         (FAILED, 'Failed'),
@@ -53,7 +55,7 @@ class Application(TimestampModelMixin, models.Model):
     2. A scheduler can:
         2.1. Approve the application
         The application will become APPROVED. The other new applications
-        will become REJECTED.
+        will become POSTPONED.
         2.2. Reject the application
         The state will be changed to REJECTED.
 
@@ -65,11 +67,14 @@ class Application(TimestampModelMixin, models.Model):
         otherwise become FAILED
 
     4. The scheduler or the resident can cancel the confirmed application
-    The application will become FAILED (TODO: discuss and update comment).
+    The application will become FAILED
 
     5. The scheduler can complete the application after the resident completes
     the shift in real life
     The application will become COMPLETED.
+
+    When a resident/a scheduler cancels the application, all postponed
+    applications become new.
     """
     owner = models.ForeignKey(
         Resident,
@@ -100,28 +105,55 @@ class Application(TimestampModelMixin, models.Model):
                 permission=can_scheduler_change_application)
     def approve(self):
         """
-        Approves the application and makes rejected all other
+        Approves the application and postpone all other
         new applications
         """
         new_applications = self.shift.applications.exclude(
             pk=self.pk).filter(state=ApplicationStateEnum.NEW)
 
         for application in new_applications:
-            application.reject()
+            application.postpone()
             application.save()
+
+    @transition(field=state,
+                source=ApplicationStateEnum.NEW,
+                target=ApplicationStateEnum.POSTPONED,
+                custom={'viewset': False, 'admin': False})
+    def postpone(self):
+        """
+        Postpones the application
+        """
+        pass
+
+    @transition(field=state,
+                source=ApplicationStateEnum.POSTPONED,
+                target=ApplicationStateEnum.NEW,
+                custom={'viewset': False, 'admin': False})
+    def renew(self):
+        """
+        Renews the application
+        """
+        # TODO: send notification to POSTPONED application's owners
+        # TODO: about shift availability
+        pass
 
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,
                 target=ApplicationStateEnum.REJECTED,
                 permission=can_scheduler_change_application)
     def reject(self):
-        pass
+        """
+        Rejects  the application
+        """
 
     @transition(field=state,
                 source=ApplicationStateEnum.APPROVED,
                 target=ApplicationStateEnum.CONFIRMED,
                 permission=can_resident_change_application)
     def confirm(self):
+        """
+        Confirms the application
+        """
         pass
 
     @transition(field=state,
@@ -136,17 +168,18 @@ class Application(TimestampModelMixin, models.Model):
                 permission=can_resident_or_scheduler_change_application)
     def cancel(self):
         """
-        Cancels the application if a confirmed shift is not started
+        Cancels the application and renew all postponed applications if
+        the shift wasn't started
         """
         if not self.shift.is_started:
-            # TODO: send notification to REJECTED application's owners
-            # TODO: about shift availability
-            pass
+            postponed_applications = self.shift.applications.filter(
+                state=ApplicationStateEnum.POSTPONED)
+
+            for application in postponed_applications:
+                application.renew()
+                application.save()
 
             if self.state == ApplicationStateEnum.APPROVED:
-                # TODO: discuss it. May be if the resident cancels
-                # TODO: the CONFIRMED application for the not started shift
-                # TODO: we should always transit the application to cancelled
                 return ApplicationStateEnum.CANCELLED
 
         return ApplicationStateEnum.FAILED
@@ -156,4 +189,7 @@ class Application(TimestampModelMixin, models.Model):
                 target=ApplicationStateEnum.COMPLETED,
                 permission=can_scheduler_change_application)
     def complete(self):
+        """
+        Completes the application
+        """
         pass

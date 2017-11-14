@@ -7,6 +7,7 @@ from apps.main.models import TimestampModelMixin
 
 
 class Shift(TimestampModelMixin, models.Model):
+    # TODO: Improve future dates support (with DST)
     date_start = models.DateTimeField(
         verbose_name='Date start'
     )

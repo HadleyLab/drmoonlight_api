@@ -139,4 +139,22 @@ class Migration(migrations.Migration):
             },
             bases=('accounts.user',),
         ),
+        migrations.AlterModelManagers(
+            name='accountmanager',
+            managers=[
+                ('objects', apps.accounts.models.user.UserManager()),
+            ],
+        ),
+        migrations.AlterModelManagers(
+            name='resident',
+            managers=[
+                ('objects', apps.accounts.models.user.UserManager()),
+            ],
+        ),
+        migrations.AlterModelManagers(
+            name='scheduler',
+            managers=[
+                ('objects', apps.accounts.models.user.UserManager()),
+            ],
+        ),
     ]
