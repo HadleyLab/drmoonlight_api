@@ -87,6 +87,7 @@ THIRD_PARTY_APPS = [
     'constance',
     'constance.backends.database',
     'raven.contrib.django.raven_compat',
+    'corsheaders',
 ]
 
 if DEBUG_EMAIL:  # pragma: no cover
@@ -98,6 +99,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -293,3 +295,5 @@ CONSTANCE_CONFIG = {
 }
 
 FSM_ADMIN_FORCE_PERMIT = True
+
+CORS_ORIGIN_ALLOW_ALL = DEBUG
