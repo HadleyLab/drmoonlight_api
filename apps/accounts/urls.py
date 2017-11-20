@@ -7,6 +7,7 @@ from apps.accounts import viewsets
 
 router = SimpleRouter()
 router.register('resident', viewsets.ResidentViewSet)
+router.register('scheduler', viewsets.SchedulerViewSet)
 
 
 urlpatterns = [
