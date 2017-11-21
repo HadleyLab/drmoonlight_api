@@ -9,5 +9,5 @@ router.register('shift', viewsets.ShiftViewSet)
 
 
 urlpatterns = [
-    url(r'^accounts/', include(router.urls)),
+    url(r'^shifts/', include(router.urls)),
 ]

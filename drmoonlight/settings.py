@@ -276,8 +276,6 @@ if RUN_TESTS:
 
     if not IS_CI:
         NOSE_ARGS += [
-            '--ipdb',
-            '--ipdb-failures',
             '--nocapture',
         ]
 

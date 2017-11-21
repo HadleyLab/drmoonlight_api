@@ -20,11 +20,15 @@ class ShiftViewSet(BulkCreateModelMixin, viewsets.ModelViewSet):
         qs = super(ShiftViewSet, self).get_queryset()
 
         user = self.request.user
+
+        if user.is_scheduler:
+            return qs.filter(owner=user.scheduler)
+
         if user.is_resident:
             resident = user.resident
             if resident.state == ResidentStateEnum.APPROVED:
                 # An approved resident can see only suitable shifts for him
-                qs = qs.filter(
+                return qs.filter(
                     speciality__in=resident.specialities.all(),
                     residency_program=resident.residency_program,
                     residency_years_required__lte=resident.residency_year
