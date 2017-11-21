@@ -1,5 +1,5 @@
-from apps.accounts.factories import ResidencyProgramFactory, SpecialityFactory, \
-    ResidentFactory
+from apps.accounts.factories import (
+    ResidencyProgramFactory, SpecialityFactory, ResidentFactory)
 from apps.accounts.models import ResidentStateEnum
 from apps.main.tests import APITestCase
 from apps.shifts.factories import ShiftFactory
@@ -63,10 +63,9 @@ class ShiftViewSetTestCase(APITestCase):
 
         resp = self.client.get('/api/shifts/shift/')
         self.assertSuccessResponse(resp)
-        data = resp.data
-        self.assertEqual(len(data), 2)
+        self.assertEqual(len(resp.data), 2)
 
-    def test_list_by_not_approved_resident_success(self):
+    def test_list_by_approved_resident_success(self):
         """
         An approved resident should fetch shifts which suit the resident
         """
@@ -204,6 +203,54 @@ class ShiftViewSetTestCase(APITestCase):
         resp = self.client.put(
             '/api/shifts/shift/{0}/'.format(self.first_shift.pk),
             data, format='json')
+        self.assertSuccessResponse(resp)
+
+    def test_get_by_unauthenticated_failed(self):
+        resp = self.client.get(
+            '/api/shifts/shift/{0}/'.format(self.first_shift.pk))
+        self.assertForbidden(resp)
+
+    def test_get_by_account_manager_failed(self):
+        self.authenticate_as_account_manager()
+
+        resp = self.client.get(
+            '/api/shifts/shift/{0}/'.format(self.first_shift.pk))
+        self.assertForbidden(resp)
+
+    def test_get_by_not_approved_resident_success(self):
+        self.authenticate_as_resident()
+
+        resp = self.client.get(
+            '/api/shifts/shift/{0}/'.format(self.first_shift.pk))
+        self.assertSuccessResponse(resp)
+
+        resp = self.client.get(
+            '/api/shifts/shift/{0}/'.format(self.second_shift.pk))
+        self.assertSuccessResponse(resp)
+
+    def test_get_by_approved_resident_success(self):
+        self.authenticate_as_resident(self.approved_resident)
+
+        resp = self.client.get(
+            '/api/shifts/shift/{0}/'.format(self.first_shift.pk))
+        self.assertSuccessResponse(resp)
+
+        resp = self.client.get(
+            '/api/shifts/shift/{0}/'.format(self.second_shift.pk))
+        self.assertSuccessResponse(resp)
+
+    def test_get_not_own_shift_by_scheduler_failed(self):
+        self.authenticate_as_scheduler()
+
+        resp = self.client.get(
+            '/api/shifts/shift/{0}/'.format(self.second_shift.pk))
+        self.assertNotFound(resp)
+
+    def test_get_by_scheduler_success(self):
+        self.authenticate_as_scheduler()
+
+        resp = self.client.get(
+            '/api/shifts/shift/{0}/'.format(self.first_shift.pk))
         self.assertSuccessResponse(resp)
 
     def test_delete_by_unauthenticated_failed(self):
