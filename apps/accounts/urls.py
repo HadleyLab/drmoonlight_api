@@ -2,7 +2,7 @@ from django.conf.urls import url, include
 from rest_framework.routers import SimpleRouter
 from djoser import views as djoser_views
 
-from apps.accounts import viewsets
+from apps.accounts import viewsets, views
 
 
 router = SimpleRouter()
@@ -28,4 +28,5 @@ urlpatterns = [
     ),
     url(r'^accounts/', include('djoser.urls.authtoken')),
     url(r'^accounts/', include(router.urls)),
+    url(r'^accounts/me/', views.MeView.as_view()),
 ]

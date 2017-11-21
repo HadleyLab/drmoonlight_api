@@ -3,3 +3,4 @@ from .resident import (
     ResidentFillProfileSerializer)
 from .scheduler import (
     SchedulerSerializer, SchedulerCreateSerializer, SchedulerUpdateSerializer)
+from .user import UserSerializer

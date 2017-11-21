@@ -3,7 +3,7 @@ from apps.accounts.models import Scheduler
 from apps.main.tests import APITestCase
 
 
-class SchedulerTestCase(APITestCase):
+class SchedulerViewSetTestCase(APITestCase):
     def test_create_token_as_scheduler(self):
         token = self.create_token(self.scheduler)
         self.assertIsNotNone(token)

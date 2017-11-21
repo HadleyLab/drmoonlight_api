@@ -4,7 +4,7 @@ from apps.accounts.models import Resident, ResidentStateEnum
 from apps.main.tests import APITestCase
 
 
-class ResidentTestCase(APITestCase):
+class ResidentViewSetTestCase(APITestCase):
     def test_create_token_as_resident(self):
         token = self.create_token(self.resident)
         self.assertIsNotNone(token)
