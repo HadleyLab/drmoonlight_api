@@ -34,6 +34,11 @@ class SchedulerViewSetTestCase(APITestCase):
         self.assertEqual(scheduler.facility_name, data['facility_name'])
         self.assertTrue(scheduler.check_password(data['password']))
 
+    def test_retrieve_by_unauthenticated_failed(self):
+        resp = self.client.get('/api/accounts/scheduler/{0}/'.format(
+            self.scheduler.pk))
+        self.assertForbidden(resp)
+
     def test_retrieve_myself_by_scheduler_success(self):
         self.authenticate_as_scheduler()
         resp = self.client.get('/api/accounts/scheduler/{0}/'.format(

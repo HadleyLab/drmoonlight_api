@@ -31,6 +31,11 @@ class ResidentViewSetTestCase(APITestCase):
         self.assertEqual(resident.last_name, data['last_name'])
         self.assertTrue(resident.check_password(data['password']))
 
+    def test_retrieve_by_unauthenticated_failed(self):
+        resp = self.client.get('/api/accounts/resident/{0}/'.format(
+            self.resident.pk))
+        self.assertForbidden(resp)
+
     def test_retrieve_myself_by_resident_success(self):
         self.authenticate_as_resident()
         resp = self.client.get('/api/accounts/resident/{0}/'.format(

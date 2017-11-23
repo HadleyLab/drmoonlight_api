@@ -6,11 +6,16 @@ class ResidentPermission(BasePermission):
         return True
 
     def has_object_permission(self, request, view, obj):
+        user = request.user
+
+        if not user.is_authenticated:
+            return False
+
         if request.method in SAFE_METHODS:
-            return request.user.is_account_manager or \
-                   request.user == obj.user_ptr
+            return user.is_account_manager or \
+                   user == obj.user_ptr
 
         if request.method in ['PUT', 'PATCH']:
-            return request.user == obj.user_ptr
+            return user == obj.user_ptr
 
         return False  # pragma: no cover
