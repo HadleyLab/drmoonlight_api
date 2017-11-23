@@ -6,6 +6,7 @@ from apps.shifts import viewsets
 
 router = SimpleRouter()
 router.register('shift', viewsets.ShiftViewSet)
+router.register('application', viewsets.ApplicationViewSet)
 
 
 urlpatterns = [

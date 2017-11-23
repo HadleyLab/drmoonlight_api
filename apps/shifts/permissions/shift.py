@@ -18,6 +18,9 @@ class ShiftPermission(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if request.method in ['PUT', 'PATCH', 'DELETE']:
-            return request.user == obj.owner.user_ptr
+            # Only a scheduler can update/delete own not started shifts
+            return not obj.is_started and \
+                   request.user.is_scheduler and \
+                   request.user.scheduler == obj.owner
 
         return True

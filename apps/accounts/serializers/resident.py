@@ -22,7 +22,7 @@ class ResidentUpdateSerializer(serializers.ModelSerializer):
         fields = (
             # Required fields
             'pk', 'email', 'first_name', 'last_name',  'residency_program',
-            'residency_year', 'specialities',
+            'residency_years', 'specialities',
 
             # Not required fields
             'earliest_availability_for_shift', 'preferences_for_work_location',
@@ -38,7 +38,7 @@ class ResidentUpdateSerializer(serializers.ModelSerializer):
         )
         extra_kwargs = {
             'residency_program': {'required': True, },
-            'residency_year': {'required': True, },
+            'residency_years': {'required': True, },
             'specialities': {'required': True, },
         }
 
@@ -47,7 +47,7 @@ class ResidentFillProfileSerializer(ResidentUpdateSerializer):
     class Meta(ResidentUpdateSerializer.Meta):
         fields = (
             # Required fields
-            'residency_program', 'residency_year',
+            'residency_program', 'residency_years',
             'specialities',
 
             # Not required fields

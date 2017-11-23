@@ -3,7 +3,6 @@ from django_fsm import FSMIntegerField, transition, RETURN_VALUE
 
 from apps.accounts.models import Resident
 from apps.main.models import TimestampModelMixin
-from .shift import Shift
 
 
 class ApplicationStateEnum(object):
@@ -82,7 +81,7 @@ class Application(TimestampModelMixin, models.Model):
         verbose_name='Owner'
     )
     shift = models.ForeignKey(
-        Shift,
+        'shifts.Shift',
         related_name='applications',
         verbose_name='Shift'
     )

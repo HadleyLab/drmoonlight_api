@@ -1,37 +1,13 @@
-from apps.accounts.factories import (
-    ResidencyProgramFactory, SpecialityFactory, ResidentFactory)
-from apps.accounts.models import ResidentStateEnum
 from apps.main.tests import APITestCase
-from apps.shifts.factories import ShiftFactory
 from apps.shifts.models import Shift
+from apps.shifts.tests.mixins import ShiftsTestCaseMixin
 
 
-class ShiftViewSetTestCase(APITestCase):
+class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
     def setUp(self):
         super(ShiftViewSetTestCase, self).setUp()
-
-        self.residency_program = ResidencyProgramFactory.create()
-        self.first_speciality = SpecialityFactory.create()
-        self.second_speciality = SpecialityFactory.create()
-        self.first_shift = ShiftFactory.create(
-            owner=self.scheduler,
-            residency_years_required=0,
-            residency_program=self.residency_program,
-            speciality=self.first_speciality
-        )
-        self.second_shift = ShiftFactory.create(
-            residency_years_required=5,
-            residency_program=self.residency_program,
-            speciality=self.second_speciality
-        )
-
-        self.approved_resident = ResidentFactory.create(
-            state=ResidentStateEnum.APPROVED,
-            residency_program=self.residency_program,
-            residency_year=5,
-        )
-        self.approved_resident.specialities.add(
-            self.first_speciality, self.second_speciality)
+        self.first_shift.owner = self.scheduler
+        self.first_shift.save(update_fields=['owner'])
 
     def test_list_by_unauthenticated_failed(self):
         resp = self.client.get('/api/shifts/shift/')
@@ -77,8 +53,8 @@ class ShiftViewSetTestCase(APITestCase):
         self.assertEqual(len(data), 2)
 
         # Change residency year, it should decrease results count
-        self.approved_resident.residency_year = 4
-        self.approved_resident.save(update_fields=['residency_year'])
+        self.approved_resident.residency_years = 4
+        self.approved_resident.save(update_fields=['residency_years'])
 
         resp = self.client.get('/api/shifts/shift/')
         self.assertSuccessResponse(resp)
@@ -238,6 +214,15 @@ class ShiftViewSetTestCase(APITestCase):
         resp = self.client.get(
             '/api/shifts/shift/{0}/'.format(self.second_shift.pk))
         self.assertSuccessResponse(resp)
+
+    def test_get_unsuitable_shift_by_approved_resident_failed(self):
+        self.approved_resident.residency_years = 0
+        self.approved_resident.save(update_fields=['residency_years'])
+        self.authenticate_as_resident(self.approved_resident)
+
+        resp = self.client.get(
+            '/api/shifts/shift/{0}/'.format(self.second_shift.pk))
+        self.assertNotFound(resp)
 
     def test_get_not_own_shift_by_scheduler_failed(self):
         self.authenticate_as_scheduler()

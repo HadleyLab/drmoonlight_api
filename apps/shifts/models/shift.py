@@ -1,9 +1,29 @@
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
+
 from contrib.easymoney import MoneyField
 
 from apps.accounts.models import Scheduler, Speciality, ResidencyProgram
 from apps.main.models import TimestampModelMixin
+
+
+class ShiftQuerySet(models.QuerySet):
+    def filter_for_resident(self, resident):
+        if resident.is_approved:
+            # An approved resident can see only suitable shifts for him
+            return self.filter(
+                Q(residency_program=resident.residency_program) |
+                Q(residency_program__isnull=True),
+                speciality__in=resident.specialities.all(),
+                residency_years_required__lte=resident.residency_years
+            )
+
+        # A not approved resident can see all shifts (but cannot apply for them)
+        return self
+
+    def filter_for_scheduler(self, scheduler):
+        return self.filter(owner=scheduler)
 
 
 class Shift(TimestampModelMixin, models.Model):
@@ -25,7 +45,8 @@ class Shift(TimestampModelMixin, models.Model):
     )
     residency_program = models.ForeignKey(
         ResidencyProgram,
-        verbose_name='Residency program'
+        verbose_name='Residency program',
+        null=True, blank=True
     )
     residency_years_required = models.PositiveIntegerField(
         verbose_name='Residency years required',
@@ -41,6 +62,8 @@ class Shift(TimestampModelMixin, models.Model):
         verbose_name='Description',
         blank=True
     )
+
+    objects = ShiftQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Shift'

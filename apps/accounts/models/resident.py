@@ -109,8 +109,8 @@ class Resident(ResidentNotificationSettingsMixin,
         verbose_name='Residency program',
         null=True, blank=True
     )
-    residency_year = models.PositiveIntegerField(
-        verbose_name='Residency year',
+    residency_years = models.PositiveIntegerField(
+        verbose_name='Residency years',
         null=True, blank=True
     )
     state = FSMIntegerField(
@@ -124,6 +124,10 @@ class Resident(ResidentNotificationSettingsMixin,
     class Meta:
         verbose_name = 'Resident'
         verbose_name_plural = 'Residents'
+
+    @property
+    def is_approved(self):
+        return self.state == ResidentStateEnum.APPROVED
 
     @transition(
         field=state,

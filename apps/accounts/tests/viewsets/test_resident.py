@@ -85,7 +85,7 @@ class ResidentViewSetTestCase(APITestCase):
         data = {
             'specialities': [SpecialityFactory.create().pk, ],
             'residency_program': ResidencyProgramFactory.create().pk,
-            'residency_year': 2017,
+            'residency_years': 2017,
         }
         resp = self.client.patch('/api/accounts/resident/{0}/'.format(
             self.resident.pk), data, format='json')
@@ -98,14 +98,14 @@ class ResidentViewSetTestCase(APITestCase):
         self.assertEqual(
             self.resident.residency_program.pk,
             data['residency_program'])
-        self.assertEqual(self.resident.residency_year, data['residency_year'])
+        self.assertEqual(self.resident.residency_years, data['residency_years'])
 
     def test_fill_profile_by_resident_success(self):
         self.authenticate_as_resident()
         data = {
             'specialities': [SpecialityFactory.create().pk, ],
             'residency_program': ResidencyProgramFactory.create().pk,
-            'residency_year': 2017,
+            'residency_years': 2017,
         }
         resp = self.client.post(
             '/api/accounts/resident/{0}/fill_profile/'.format(
@@ -123,7 +123,7 @@ class ResidentViewSetTestCase(APITestCase):
         self.assertEqual(
             self.resident.residency_program.pk,
             data['residency_program'])
-        self.assertEqual(self.resident.residency_year, data['residency_year'])
+        self.assertEqual(self.resident.residency_years, data['residency_years'])
 
         # TODO: check that email sent
 
