@@ -24,16 +24,10 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = (DjangoFilterBackend, )
     filter_fields = ('state', )
 
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return ApplicationCreateSerializer
-
-        return self.serializer_class
-
     def get_queryset(self):
         qs = super(ApplicationViewSet, self).get_queryset()
 
-        # TODO: set up ordering
+        # TODO: set up ordering. Without messages should be first
         qs = qs.order_by('-date_created')
 
         user = self.request.user

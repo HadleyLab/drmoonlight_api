@@ -2,7 +2,7 @@ from django.test import mock
 from django.utils import timezone
 
 from apps.main.tests import APITestCase
-from apps.shifts.factories import ShiftFactory
+from apps.shifts.factories import ShiftFactory, ApplicationFactory
 from apps.shifts.tests.mixins import ShiftsTestCaseMixin
 
 
@@ -168,3 +168,51 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
 
         mock_process_invitation.assert_called_with(
             application)
+
+    def test_list_by_unauthenticated_failed(self):
+        resp = self.client.get('/api/shifts/application/')
+        self.assertForbidden(resp)
+
+    def test_list_by_account_manager_failed(self):
+        self.authenticate_as_account_manager()
+
+        resp = self.client.get('/api/shifts/application/')
+        self.assertForbidden(resp)
+
+    def test_list_by_not_approved_resident_failed(self):
+        self.authenticate_as_resident()
+
+        resp = self.client.get('/api/shifts/application/')
+        self.assertForbidden(resp)
+
+    def test_list_by_approved_resident_success(self):
+        self.authenticate_as_resident(self.approved_resident)
+
+        first_application = ApplicationFactory.create(
+            owner=self.approved_resident, shift=self.first_shift)
+        second_application = ApplicationFactory.create(
+            owner=self.approved_resident, shift=self.second_shift)
+
+        resp = self.client.get('/api/shifts/application/')
+        self.assertSuccessResponse(resp)
+
+        data = resp.data
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]['pk'], second_application.pk)
+        self.assertEqual(data[1]['pk'], first_application.pk)
+
+    def test_list_by_scheduler_success(self):
+        self.authenticate_as_scheduler()
+
+        application = ApplicationFactory.create(
+            owner=self.approved_resident, shift=self.first_shift)
+
+        ApplicationFactory.create(
+            owner=self.approved_resident, shift=self.second_shift)
+
+        resp = self.client.get('/api/shifts/application/')
+        self.assertSuccessResponse(resp)
+
+        data = resp.data
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['pk'], application.pk)
