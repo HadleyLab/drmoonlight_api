@@ -38,7 +38,7 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
         if user.is_resident:
             return qs.filter(owner=user.resident)
 
-        return qs
+        return qs.none()  # pragma: no cover
 
     @list_route(
         methods=['POST'],

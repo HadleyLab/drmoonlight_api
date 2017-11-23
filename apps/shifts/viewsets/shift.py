@@ -30,7 +30,7 @@ class ShiftViewSet(BulkCreateModelMixin, viewsets.ModelViewSet):
         if user.is_resident:
             return qs.filter_for_resident(user.resident)
 
-        return qs
+        return qs.none()  # pragma: no cover
 
     @transaction.atomic
     def perform_create(self, serializer):

@@ -11,10 +11,7 @@ class ShiftPermission(BasePermission):
         if request.method == 'POST':
             return user.is_scheduler
 
-        if request.method in SAFE_METHODS:
-            return user.is_scheduler or user.is_resident
-
-        return True
+        return user.is_scheduler or user.is_resident
 
     def has_object_permission(self, request, view, obj):
         if request.method in ['PUT', 'PATCH', 'DELETE']:
