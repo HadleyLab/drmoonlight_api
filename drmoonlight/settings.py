@@ -171,13 +171,13 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
     'DEFAULT_RENDERER_CLASSES': (
-        'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
+        'libs.drf_kebab_case.renderers.KebabCaseJSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_PARSER_CLASSES': (
-        'djangorestframework_camel_case.parser.CamelCaseJSONParser',
-        'djangorestframework_camel_case.parser.CamelCaseFormParser',
-        'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
+        'libs.drf_kebab_case.parsers.KebabCaseJSONParser',
+        'libs.drf_kebab_case.parsers.KebabCaseFormParser',
+        'libs.drf_kebab_case.parsers.KebabCaseMultiPartParser',
     ),
 }
 
@@ -193,9 +193,6 @@ DJOSER = {
         # TODO: change this url
         '/activate/{uid}/{token}'),
     'SEND_ACTIVATION_EMAIL': True,
-    # 'SERIALIZERS': {
-    #     'user_registration': 'apps.accounts.serializers.doctor.RegisterDoctorSerializer',
-    # },
 }
 
 # Internationalization
