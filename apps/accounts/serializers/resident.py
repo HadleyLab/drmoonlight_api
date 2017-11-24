@@ -7,7 +7,7 @@ from .user import UserCreateSerializer
 class ResidentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resident
-        fields = ('pk', 'email', 'first_name', 'last_name', 'state', )
+        exclude = ('password', )
 
 
 class ResidentCreateSerializer(UserCreateSerializer):

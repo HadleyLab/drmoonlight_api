@@ -7,8 +7,7 @@ from .user import UserCreateSerializer
 class SchedulerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scheduler
-        fields = ('pk', 'email', 'first_name', 'last_name', 'department_name',
-            'facility_name', )
+        exclude = ('password', )
 
 
 class SchedulerCreateSerializer(UserCreateSerializer):
@@ -25,5 +24,3 @@ class SchedulerUpdateSerializer(serializers.ModelSerializer):
             'pk', 'email', 'first_name', 'last_name', 'department_name',
             'facility_name',
         )
-
-
