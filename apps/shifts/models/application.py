@@ -52,7 +52,7 @@ class ApplicationQuerySet(models.QuerySet):
         if resident.is_approved:
             return self.filter(owner=resident)
 
-        return self.none()
+        return self.none()  # pragma: no cover
 
     def filter_for_scheduler(self, scheduler):
         return self.filter(shift__owner=scheduler)

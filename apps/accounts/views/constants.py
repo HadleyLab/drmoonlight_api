@@ -6,13 +6,13 @@ from apps.accounts.models import ResidencyProgram, Speciality
 
 
 @api_view()
-@permission_classes([AllowAny])
+@permission_classes((AllowAny, ))
 def constants(request):
     residency_program = ResidencyProgram.objects.values('pk', 'name')
     speciality = Speciality.objects.values('pk', 'name')
 
     return Response(
         {
-            "residency_program": residency_program,
-            "speciality": speciality,
+            'residency_program': list(residency_program),
+            'speciality': list(speciality),
         })
