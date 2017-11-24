@@ -29,4 +29,5 @@ urlpatterns = [
     url(r'^accounts/', include('djoser.urls.authtoken')),
     url(r'^accounts/', include(router.urls)),
     url(r'^accounts/me/', views.MeView.as_view()),
+    url(r'^constants/', views.constants),
 ]
