@@ -25,6 +25,15 @@ class ShiftQuerySet(models.QuerySet):
     def filter_for_scheduler(self, scheduler):
         return self.filter(owner=scheduler)
 
+    def filter_for_user(self, user):
+        if user.is_scheduler:
+            return self.filter_for_scheduler(user.scheduler)
+
+        if user.is_resident:
+            return self.filter_for_resident(user.resident)
+
+        return self.none()
+
 
 class Shift(TimestampModelMixin, models.Model):
     # TODO: Improve future dates support (with DST)

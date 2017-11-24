@@ -22,15 +22,7 @@ class ShiftViewSet(BulkCreateModelMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         qs = super(ShiftViewSet, self).get_queryset()
 
-        user = self.request.user
-
-        if user.is_scheduler:
-            return qs.filter_for_scheduler(user.scheduler)
-
-        if user.is_resident:
-            return qs.filter_for_resident(user.resident)
-
-        return qs.none()  # pragma: no cover
+        return qs.filter_for_user(self.request.user)
 
     @transaction.atomic
     def perform_create(self, serializer):

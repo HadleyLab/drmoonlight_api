@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from apps.accounts.models import Resident
-from apps.shifts.models import Shift, Application
+from apps.shifts.models import Shift
 
 
 class ShiftSerializer(serializers.ModelSerializer):

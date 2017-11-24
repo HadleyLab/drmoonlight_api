@@ -7,7 +7,7 @@ from apps.shifts.models import Application, Shift
 class ApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
-        fields = ('pk', 'owner', 'shift', 'state', )
+        fields = ('pk', 'date_created', 'owner', 'shift', 'state', )
 
 
 class BaseApplicationCreateSerializer(serializers.ModelSerializer):

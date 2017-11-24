@@ -46,6 +46,26 @@ def can_resident_or_scheduler_change_application(instance, user):
            can_resident_change_application(instance, user)
 
 
+class ApplicationQuerySet(models.QuerySet):
+    def filter_for_resident(self, resident):
+        if resident.is_approved:
+            return self.filter(owner=resident)
+
+        return self.none()
+
+    def filter_for_scheduler(self, scheduler):
+        return self.filter(shift__owner=scheduler)
+
+    def filter_for_user(self, user):
+        if user.is_scheduler:
+            return self.filter_for_scheduler(user.scheduler)
+
+        if user.is_resident:
+            return self.filter_for_resident(user.resident)
+
+        return self.none()
+
+
 class Application(TimestampModelMixin, models.Model):
     """
     Application workflow:
@@ -90,6 +110,7 @@ class Application(TimestampModelMixin, models.Model):
         default=ApplicationStateEnum.NEW,
         choices=ApplicationStateEnum.CHOICES
     )
+    objects = ApplicationQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Application'

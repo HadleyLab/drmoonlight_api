@@ -12,6 +12,7 @@ django-storages==1.6.5
 Django==1.11.6
 djangorestframework==3.7.1
 django-cors-headers==2.1.0
+drf-nested-routers==0.90.0
 djoser==1.0.1
 gunicorn==19.7.1
 Pillow==4.3.0

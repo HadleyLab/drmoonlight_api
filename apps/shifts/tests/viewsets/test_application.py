@@ -216,3 +216,5 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         data = resp.data
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['pk'], application.pk)
+
+    # TODO: cover transition actions

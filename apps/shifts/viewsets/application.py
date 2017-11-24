@@ -1,3 +1,4 @@
+from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, pagination, status, response
 from rest_framework.decorators import list_route
@@ -30,15 +31,7 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
         # TODO: set up ordering. Without messages should be first
         qs = qs.order_by('-date_created')
 
-        user = self.request.user
-
-        if user.is_scheduler:
-            return qs.filter(shift__owner=user.scheduler)
-
-        if user.is_resident:
-            return qs.filter(owner=user.resident)
-
-        return qs.none()  # pragma: no cover
+        return qs.filter_for_user(self.request.user)
 
     @list_route(
         methods=['POST'],
@@ -54,6 +47,7 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
         return response.Response(
             data=serializer.data, status=status.HTTP_201_CREATED)
 
+    @transaction.atomic
     def perform_apply(self, serializer):
         user = self.request.user
 
@@ -76,6 +70,7 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
         return response.Response(
             data=serializer.data, status=status.HTTP_201_CREATED)
 
+    @transaction.atomic
     def perform_invite(self, serializer):
         instance = serializer.save()
         process_invitation(instance)
