@@ -7,7 +7,7 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
     def setUp(self):
         super(ShiftViewSetTestCase, self).setUp()
         self.first_shift.owner = self.scheduler
-        self.first_shift.save(update_fields=['owner'])
+        self.first_shift.save()
 
     def test_list_by_unauthenticated_failed(self):
         resp = self.client.get('/api/shifts/shift/')
@@ -54,7 +54,7 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
 
         # Change residency year, it should decrease results count
         self.approved_resident.residency_years = 4
-        self.approved_resident.save(update_fields=['residency_years'])
+        self.approved_resident.save()
 
         resp = self.client.get('/api/shifts/shift/')
         self.assertSuccessResponse(resp)
@@ -217,7 +217,7 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
 
     def test_get_unsuitable_shift_by_approved_resident_failed(self):
         self.approved_resident.residency_years = 0
-        self.approved_resident.save(update_fields=['residency_years'])
+        self.approved_resident.save()
         self.authenticate_as_resident(self.approved_resident)
 
         resp = self.client.get(

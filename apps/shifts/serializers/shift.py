@@ -13,4 +13,4 @@ class ShiftSerializer(serializers.ModelSerializer):
             'pk', 'owner', 'date_created', 'date_modified', 'date_end',
             'date_start', 'speciality', 'residency_program',
             'residency_years_required', 'payment_amount', 'payment_per_hour',
-            'description', )
+            'description', 'state', )

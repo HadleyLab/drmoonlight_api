@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from apps.accounts.serializers import ResidentSerializer
-from apps.shifts.models import Application, Shift
+from apps.shifts.models import Application, Shift, ShiftStateEnum
 from .shift import ShiftSerializer
 
 
@@ -25,7 +25,11 @@ class BaseApplicationCreateSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 'You can not create an application for a started shift')
 
-        # TODO: check that a shift does not have approved applications
+        if shift.state == ShiftStateEnum.COVERAGE_COMPLETED:
+            raise ValidationError(
+                'You can not create an application for coverage '
+                'completed shift')
+
         return shift
 
 

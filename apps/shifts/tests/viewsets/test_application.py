@@ -10,7 +10,7 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
     def setUp(self):
         super(ApplicationViewSetTestCase, self).setUp()
         self.first_shift.owner = self.scheduler
-        self.first_shift.save(update_fields=['owner'])
+        self.first_shift.save()
 
     def get_apply_data(self, **kwargs):
         data = {
@@ -218,3 +218,5 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         self.assertEqual(data[0]['pk'], application.pk)
 
     # TODO: cover transition actions
+
+    # TODO: cover apply/invite for a coverage completed shift

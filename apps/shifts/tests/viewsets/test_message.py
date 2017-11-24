@@ -9,7 +9,7 @@ class MessageViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
     def setUp(self):
         super(MessageViewSetTestCase, self).setUp()
         self.first_shift.owner = self.scheduler
-        self.first_shift.save(update_fields=['owner'])
+        self.first_shift.save()
 
         self.first_application = ApplicationFactory.create(
             owner=self.approved_resident,

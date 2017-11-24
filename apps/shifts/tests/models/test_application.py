@@ -5,7 +5,7 @@ from django_fsm import has_transition_perm
 
 from apps.accounts.factories import ResidentFactory, SchedulerFactory
 from apps.shifts.factories import ApplicationFactory, ShiftFactory
-from apps.shifts.models import ApplicationStateEnum
+from apps.shifts.models import ApplicationStateEnum, Application
 
 
 class ApplicationTest(TestCase):
@@ -15,6 +15,22 @@ class ApplicationTest(TestCase):
         self.resident = ResidentFactory.create()
         self.scheduler = SchedulerFactory.create()
         self.shift = ShiftFactory.create(owner=self.scheduler)
+
+    def test_aggregate_count_by_state(self):
+        ApplicationFactory.create(state=ApplicationStateEnum.CANCELLED)
+        ApplicationFactory.create(state=ApplicationStateEnum.APPROVED)
+        ApplicationFactory.create(state=ApplicationStateEnum.REJECTED)
+        ApplicationFactory.create(state=ApplicationStateEnum.REJECTED)
+        ApplicationFactory.create(state=ApplicationStateEnum.POSTPONED)
+        ApplicationFactory.create(state=ApplicationStateEnum.POSTPONED)
+
+        applications_count = Application.objects.aggregate_count_by_state()
+        self.assertDictEqual(applications_count, {
+            ApplicationStateEnum.CANCELLED: 1,
+            ApplicationStateEnum.APPROVED: 1,
+            ApplicationStateEnum.REJECTED: 2,
+            ApplicationStateEnum.POSTPONED: 2,
+        })
 
     def test_approve(self):
         # New applications

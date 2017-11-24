@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Count
 from django_fsm import FSMIntegerField, transition, RETURN_VALUE
 
 from apps.accounts.models import Resident
@@ -64,6 +65,14 @@ class ApplicationQuerySet(models.QuerySet):
             return self.filter_for_resident(user.resident)
 
         return self.none()  # pragma: no cover
+
+    def aggregate_count_by_state(self):
+        count_by_state = self.values('state') \
+            .order_by('state') \
+            .annotate(count=Count('state')) \
+            .values_list('state', 'count')
+
+        return dict(count_by_state)
 
 
 class Application(TimestampModelMixin, models.Model):
@@ -212,4 +221,5 @@ class Application(TimestampModelMixin, models.Model):
         """
         Completes the application
         """
+        # TODO: check that now() >= shift.date_end
         pass

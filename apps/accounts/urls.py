@@ -9,7 +9,7 @@ router = SimpleRouter()
 router.register('resident', viewsets.ResidentViewSet)
 router.register('scheduler', viewsets.SchedulerViewSet)
 
-
+# TODO: move into accounts namespace
 urlpatterns = [
     url(
         r'^accounts/activate/$',

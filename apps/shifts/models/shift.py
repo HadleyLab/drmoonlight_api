@@ -8,6 +8,13 @@ from apps.accounts.models import Scheduler, Speciality, ResidencyProgram
 from apps.main.models import TimestampModelMixin
 
 
+class ShiftStateEnum(object):
+    COMPLETED = 'completed'
+    WITHOUT_APPLIES = 'without_applies'
+    COVERAGE_COMPLETED = 'coverage_completed'
+    REQUIRE_APPROVAL = 'require_approval'
+
+
 class ShiftQuerySet(models.QuerySet):
     def filter_for_resident(self, resident):
         if resident.is_approved:
@@ -91,3 +98,23 @@ class Shift(TimestampModelMixin, models.Model):
     @property
     def is_ended(self):
         return self.date_end < timezone.now()
+
+    @property
+    def state(self):
+        from .application import ApplicationStateEnum
+
+        if self.is_ended:
+            return ShiftStateEnum.COMPLETED
+
+        applications_count = self.applications.aggregate_count_by_state()
+
+        confirmed = applications_count.get(ApplicationStateEnum.CONFIRMED, 0)
+        approved = applications_count.get(ApplicationStateEnum.APPROVED, 0)
+        if confirmed or approved:
+            return ShiftStateEnum.COVERAGE_COMPLETED
+
+        new = applications_count.get(ApplicationStateEnum.NEW, 0)
+        if new:
+            return ShiftStateEnum.REQUIRE_APPROVAL
+
+        return ShiftStateEnum.WITHOUT_APPLIES
