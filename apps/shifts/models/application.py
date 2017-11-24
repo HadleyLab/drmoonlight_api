@@ -63,7 +63,7 @@ class ApplicationQuerySet(models.QuerySet):
         if user.is_resident:
             return self.filter_for_resident(user.resident)
 
-        return self.none()
+        return self.none()  # pragma: no cover
 
 
 class Application(TimestampModelMixin, models.Model):

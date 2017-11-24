@@ -4,7 +4,7 @@ from rest_framework.generics import get_object_or_404
 
 from apps.shifts.models import Message, Application
 from apps.shifts.permissions import MessagePermission
-from apps.shifts.serializers import MessageSerializer, MessageCreateSerializer
+from apps.shifts.serializers import MessageSerializer
 from apps.shifts.services.message import process_message_creation
 
 
@@ -26,12 +26,6 @@ class MessageViewSet(mixins.CreateModelMixin, viewsets.ReadOnlyModelViewSet):
         return get_object_or_404(
             Application.objects.filter_for_user(self.request.user),
             pk=application_pk)
-
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return MessageCreateSerializer
-
-        return self.serializer_class
 
     def get_queryset(self):
         qs = super(MessageViewSet, self).get_queryset()

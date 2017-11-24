@@ -1,10 +1,15 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from apps.accounts.serializers import ResidentSerializer
 from apps.shifts.models import Application, Shift
+from .shift import ShiftSerializer
 
 
 class ApplicationSerializer(serializers.ModelSerializer):
+    owner = ResidentSerializer()
+    shift = ShiftSerializer()
+
     class Meta:
         model = Application
         fields = ('pk', 'date_created', 'owner', 'shift', 'state', )
