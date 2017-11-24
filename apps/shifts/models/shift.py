@@ -118,3 +118,7 @@ class Shift(TimestampModelMixin, models.Model):
             return ShiftStateEnum.REQUIRE_APPROVAL
 
         return ShiftStateEnum.WITHOUT_APPLIES
+
+    @property
+    def is_coverage_completed(self):
+        return self.state == ShiftStateEnum.COVERAGE_COMPLETED

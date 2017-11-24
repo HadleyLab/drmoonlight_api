@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from apps.main.tests import APITestCase
 from apps.shifts.factories import ShiftFactory, ApplicationFactory
+from apps.shifts.models import ApplicationStateEnum
 from apps.shifts.tests.mixins import ShiftsTestCaseMixin
 
 
@@ -60,6 +61,24 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         resp = self.client.post(
             '/api/shifts/application/apply/', data, format='json')
         self.assertBadRequest(resp)
+        self.assertEqual(
+            resp.data['shift'],
+            ['You can not create an application for a started shift'])
+
+    def test_apply_for_coverage_completed_shift_by_approved_resident_failed(
+            self):
+        self.authenticate_as_resident(self.approved_resident)
+
+        ApplicationFactory.create(
+            shift=self.first_shift, state=ApplicationStateEnum.APPROVED)
+
+        data = self.get_apply_data()
+        resp = self.client.post(
+            '/api/shifts/application/apply/', data, format='json')
+        self.assertBadRequest(resp)
+        self.assertEqual(
+            resp.data['shift'],
+            ['You can not create an application for coverage completed shift'])
 
     def test_apply_for_unsuitable_shift_by_approved_resident_failed(self):
         self.authenticate_as_resident(self.approved_resident)
@@ -70,6 +89,9 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         resp = self.client.post(
             '/api/shifts/application/apply/', data, format='json')
         self.assertBadRequest(resp)
+        self.assertEqual(
+            resp.data['shift'],
+            ['You can not create an application for not suitable shift'])
 
     @mock.patch(
         'apps.shifts.viewsets.application.process_application', autospec=True)
@@ -128,6 +150,9 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         resp = self.client.post(
             '/api/shifts/application/invite/', data, format='json')
         self.assertBadRequest(resp)
+        self.assertEqual(
+            resp.data['shift'],
+            ['You can not create an application for not own shift'])
 
     def test_invite_not_approved_resident_by_scheduler_failed(self):
         self.authenticate_as_scheduler()
@@ -136,6 +161,9 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         resp = self.client.post(
             '/api/shifts/application/invite/', data, format='json')
         self.assertBadRequest(resp)
+        self.assertEqual(
+            resp.data['owner'],
+            ['You can not create an application for a not approved resident'])
 
     def test_invite_for_started_shift_by_scheduler_failed(self):
         self.authenticate_as_scheduler()
@@ -149,6 +177,24 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         resp = self.client.post(
             '/api/shifts/application/invite/', data, format='json')
         self.assertBadRequest(resp)
+        self.assertEqual(
+            resp.data['shift'],
+            ['You can not create an application for a started shift'])
+
+    def test_invite_for_covered_completed_shift_by_scheduler_failed(
+            self):
+        self.authenticate_as_scheduler()
+
+        ApplicationFactory.create(
+            shift=self.first_shift, state=ApplicationStateEnum.APPROVED)
+
+        data = self.get_invite_data()
+        resp = self.client.post(
+            '/api/shifts/application/invite/', data, format='json')
+        self.assertBadRequest(resp)
+        self.assertEqual(
+            resp.data['shift'],
+            ['You can not create an application for coverage completed shift'])
 
     @mock.patch(
         'apps.shifts.viewsets.application.process_invitation', autospec=True)
@@ -218,5 +264,3 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         self.assertEqual(data[0]['pk'], application.pk)
 
     # TODO: cover transition actions
-
-    # TODO: cover apply/invite for a coverage completed shift

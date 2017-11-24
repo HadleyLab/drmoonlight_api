@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from apps.accounts.serializers import ResidentSerializer
-from apps.shifts.models import Application, Shift, ShiftStateEnum
+from apps.shifts.models import Application, Shift
 from .shift import ShiftSerializer
 
 
@@ -25,7 +25,7 @@ class BaseApplicationCreateSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 'You can not create an application for a started shift')
 
-        if shift.state == ShiftStateEnum.COVERAGE_COMPLETED:
+        if shift.is_coverage_completed:
             raise ValidationError(
                 'You can not create an application for coverage '
                 'completed shift')
@@ -66,7 +66,7 @@ class InvitationCreateSerializer(BaseApplicationCreateSerializer):
         assert user.is_scheduler, \
             'InvitationCreateSerializer only for a scheduler'
 
-        # TODO:  can the scheduler invite an unsuitable resident?
+        # TODO: can the scheduler invite an unsuitable resident?
         if shift.owner != user.scheduler:
             raise ValidationError(
                 'You can not create an application for not own shift')
