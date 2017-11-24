@@ -9,10 +9,12 @@ from .shift import ShiftSerializer
 class ApplicationSerializer(serializers.ModelSerializer):
     owner = ResidentSerializer()
     shift = ShiftSerializer()
+    messages_count = serializers.IntegerField()
 
     class Meta:
         model = Application
-        fields = ('pk', 'date_created', 'owner', 'shift', 'state', )
+        fields = ('pk', 'date_created', 'owner', 'shift', 'state',
+                  'messages_count', )
 
 
 class BaseApplicationCreateSerializer(serializers.ModelSerializer):

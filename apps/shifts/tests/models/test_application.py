@@ -4,7 +4,8 @@ from django.utils import timezone
 from django_fsm import has_transition_perm
 
 from apps.accounts.factories import ResidentFactory, SchedulerFactory
-from apps.shifts.factories import ApplicationFactory, ShiftFactory
+from apps.shifts.factories import ApplicationFactory, ShiftFactory, \
+    MessageFactory
 from apps.shifts.models import ApplicationStateEnum, Application
 
 
@@ -31,6 +32,65 @@ class ApplicationTest(TestCase):
             ApplicationStateEnum.REJECTED: 2,
             ApplicationStateEnum.POSTPONED: 2,
         })
+
+    def test_order_by_without_messages_first(self):
+        def assert_applications_pks_equal_to(pks):
+            applications = Application.objects \
+                .order_by_without_messages_first() \
+                .values_list('pk', flat=True)
+            self.assertListEqual(list(applications), pks)
+
+        # Create fourths applications without messages
+        # They should be ordered by date
+        first_application = ApplicationFactory.create()
+        second_application = ApplicationFactory.create()
+        third_application = ApplicationFactory.create()
+        fourth_application = ApplicationFactory.create()
+
+        assert_applications_pks_equal_to(
+            [
+                fourth_application.pk, third_application.pk,
+                second_application.pk, first_application.pk,
+            ]
+        )
+
+        # Create a message for third application. So, the third application
+        # should be places after all application without messages
+        MessageFactory.create(
+            owner=self.resident, application=third_application)
+
+        assert_applications_pks_equal_to(
+            [
+                fourth_application.pk, second_application.pk,
+                first_application.pk, third_application.pk,
+            ]
+        )
+
+        # Create a message for first application. So, the first application
+        # should be places after all application without messages and
+        # ordered by date
+        MessageFactory.create(
+            owner=self.resident, application=first_application)
+
+        assert_applications_pks_equal_to(
+            [
+                fourth_application.pk, second_application.pk,
+                third_application.pk, first_application.pk,
+            ]
+        )
+
+        # Create a message for fourth application. So, the fourth application
+        # should be places after all application without messages and
+        # ordered by date
+        MessageFactory.create(
+            owner=self.resident, application=fourth_application)
+
+        assert_applications_pks_equal_to(
+            [
+                second_application.pk, fourth_application.pk,
+                third_application.pk, first_application.pk,
+            ]
+        )
 
     def test_approve(self):
         # New applications

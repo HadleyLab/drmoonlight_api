@@ -28,10 +28,9 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         qs = super(ApplicationViewSet, self).get_queryset()
 
-        # TODO: set up ordering. Without messages should be first
-        qs = qs.order_by('-date_created')
-
-        return qs.filter_for_user(self.request.user)
+        return qs.filter_for_user(self.request.user) \
+            .annotate_messages_count() \
+            .order_by_without_messages_first()
 
     @list_route(
         methods=['POST'],

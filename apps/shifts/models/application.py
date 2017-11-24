@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Count
+from django.db.models import Count, Case, When
 from django_fsm import FSMIntegerField, transition, RETURN_VALUE
 
 from apps.accounts.models import Resident
@@ -73,6 +73,20 @@ class ApplicationQuerySet(models.QuerySet):
             .values_list('state', 'count')
 
         return dict(count_by_state)
+
+    def annotate_messages_count(self):
+        return self.annotate(
+            messages_count=Count('messages', distinct=True)
+        )
+
+    def order_by_without_messages_first(self):
+        return self.annotate_messages_count().annotate(
+            without_messages=Case(
+                When(messages_count=0, then=True),
+                default=False,
+                output_field=models.BooleanField()
+            )
+        ).order_by('-without_messages', '-date_created')
 
 
 class Application(TimestampModelMixin, models.Model):
