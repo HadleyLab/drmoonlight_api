@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django_fsm import get_available_user_FIELD_transitions
 
 
 class FSMAvailableUserTransitionsField(serializers.ReadOnlyField):
@@ -15,9 +14,9 @@ class FSMAvailableUserTransitionsField(serializers.ReadOnlyField):
 
         user = request.user
 
-        state_model_field = obj.__class__._meta.get_field(self.state_field)
-        available_transitions = get_available_user_FIELD_transitions(
-            obj, user, state_model_field)
+        method = getattr(
+            obj, 'get_available_user_{0}_transitions'.format(self.state_field))
+        available_transitions = method(user)
 
         return [
             transition.name
