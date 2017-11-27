@@ -4,8 +4,14 @@ def process_shift_creation(shift):
 
 
 def process_shift_updating(shift):
-    # TODO: send email to all suitable residents about changing
-    pass
+    if shift.has_active_applications:
+        # TODO: send email to all active applicants about updated information
+        active_applications = shift.applications.filter_active()
+
+        pass
+    else:
+        # TODO: send email to all suitable residents about changing
+        pass
 
 
 def process_shift_deletion(shift):

@@ -9,16 +9,16 @@ from apps.main.models import TimestampModelMixin
 class ApplicationStateEnum(object):
     NEW = 1
 
-    # First stage
+    # First stage (when a resident approved or rejected)
     APPROVED = 2
     REJECTED = 3
     POSTPONED = 4
 
-    # Second stage
+    # Second stage (when resident confirmed or cancelled)
     CONFIRMED = 5
     CANCELLED = 6
 
-    # Third stage
+    # Third stage (when shift ended)
     FAILED = 7
     COMPLETED = 8
 
@@ -32,6 +32,10 @@ class ApplicationStateEnum(object):
         (FAILED, 'Failed'),
         (COMPLETED, 'Completed'),
     )
+
+    # An application is active when the shift isn't ended and the applications
+    # isn't cancelled/rejected/postponed
+    ACTIVE_STATES = (NEW, APPROVED, CONFIRMED, )
 
 
 def can_scheduler_change_application(instance, user):
@@ -65,6 +69,9 @@ class ApplicationQuerySet(models.QuerySet):
             return self.filter_for_resident(user.resident)
 
         return self.none()  # pragma: no cover
+
+    def filter_active(self):
+        return self.filter(state__in=ApplicationStateEnum.ACTIVE_STATES)
 
     def aggregate_count_by_state(self):
         count_by_state = self.values('state') \
