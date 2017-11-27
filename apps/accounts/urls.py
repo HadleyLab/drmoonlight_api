@@ -21,6 +21,11 @@ urlpatterns = [
         djoser_views.PasswordResetView.as_view(),
         name='password_reset'
     ),
+     url(
+        r'^accounts/password/$',
+        djoser_views.SetPasswordView.as_view(),
+        name='password_reset'
+    ),
     url(
         r'^accounts/password/reset/confirm/$',
         djoser_views.PasswordResetConfirmView.as_view(),

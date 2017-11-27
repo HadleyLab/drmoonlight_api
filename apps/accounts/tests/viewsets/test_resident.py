@@ -100,6 +100,17 @@ class ResidentViewSetTestCase(APITestCase):
             data['residency_program'])
         self.assertEqual(self.resident.residency_years, data['residency_years'])
 
+    def test_update_using_existing_another_email_by_resident_failed(self):
+        ResidentFactory.create(email='another@gmail.com')
+
+        self.authenticate_as_resident()
+        data = {
+            'email' 'another@gmail.com',
+        }
+        resp = self.client.patch('/api/accounts/resident/{0}/'.format(
+            self.resident.pk), data, format='json')
+        self.assertBadRequest(resp)
+
     def test_fill_profile_by_resident_success(self):
         self.authenticate_as_resident()
         data = {
