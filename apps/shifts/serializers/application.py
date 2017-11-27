@@ -22,6 +22,15 @@ class ApplicationSerializer(serializers.ModelSerializer):
                   'messages_count', 'last_message', 'available_transitions', )
 
 
+class ApplicationNotifySerializer(serializers.ModelSerializer):
+    owner = ResidentSerializer()
+    shift = ShiftSerializer()
+
+    class Meta:
+        model = Application
+        fields = ('pk', 'date_created', 'owner', 'shift', 'state', )
+
+
 class BaseApplicationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
