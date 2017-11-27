@@ -3,6 +3,7 @@ from rest_framework.exceptions import ValidationError
 
 from apps.accounts.serializers import ResidentSerializer
 from apps.shifts.models import Application, Shift
+from .message import MessageSerializer
 from .shift import ShiftSerializer
 
 
@@ -10,11 +11,12 @@ class ApplicationSerializer(serializers.ModelSerializer):
     owner = ResidentSerializer()
     shift = ShiftSerializer()
     messages_count = serializers.IntegerField()
+    last_message = MessageSerializer()
 
     class Meta:
         model = Application
         fields = ('pk', 'date_created', 'owner', 'shift', 'state',
-                  'messages_count', )
+                  'messages_count', 'last_message', )
 
 
 class BaseApplicationCreateSerializer(serializers.ModelSerializer):

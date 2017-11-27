@@ -306,3 +306,19 @@ class ApplicationTest(TestCase):
         # Scheduler can complete confirmed applications
         self.assertTrue(has_transition_perm(
             application.complete, self.scheduler))
+
+    def test_last_message_when_do_not_have_messages_is_none(self):
+        application = ApplicationFactory.create()
+
+        self.assertIsNone(application.last_message)
+
+    def test_last_message_when_have_messages_equals_to_last_message(self):
+        application = ApplicationFactory.create(owner=self.resident)
+        # The first message
+        MessageFactory.create(
+            owner=self.resident, application=application)
+        # The second (last) message
+        last_message = MessageFactory.create(
+            owner=self.resident, application=application)
+
+        self.assertEqual(application.last_message, last_message)

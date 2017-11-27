@@ -149,6 +149,15 @@ class Application(TimestampModelMixin, models.Model):
     def __str__(self):
         return "{0} by {1}".format(self.shift, self.owner)
 
+    @property
+    def last_message(self):
+        """
+        Returns last message for the applications (sorted by date)
+
+        TODO: optimize it. Now it creates N+1 queries
+        """
+        return self.messages.order_by('date_created').last()
+
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,
                 target=ApplicationStateEnum.APPROVED,

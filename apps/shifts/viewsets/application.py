@@ -28,7 +28,8 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         qs = super(ApplicationViewSet, self).get_queryset()
 
-        return qs.filter_for_user(self.request.user) \
+        return qs.select_related('owner', 'shift') \
+            .filter_for_user(self.request.user) \
             .annotate_messages_count() \
             .order_by_without_messages_first()
 
