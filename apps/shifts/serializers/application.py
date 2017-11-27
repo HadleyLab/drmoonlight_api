@@ -24,6 +24,14 @@ class BaseApplicationCreateSerializer(serializers.ModelSerializer):
         model = Application
         fields = ('pk', 'shift', )
 
+    def validate_uniqueness(self, shift, owner):
+        existing_applications = Application.objects.filter(
+            owner=owner, shift=shift)
+
+        if existing_applications.exists():
+            raise ValidationError(
+                'There is an already created application for the shift')
+
     def validate_shift(self, shift):
         if shift.is_started:
             raise ValidationError(
@@ -57,6 +65,14 @@ class ApplicationCreateSerializer(BaseApplicationCreateSerializer):
 
         return shift
 
+    def validate(self, attrs):
+        shift = attrs['shift']
+        user = self.context['request'].user
+
+        self.validate_uniqueness(shift, user.resident)
+
+        return attrs
+
 
 class InvitationCreateSerializer(BaseApplicationCreateSerializer):
     class Meta:
@@ -82,3 +98,11 @@ class InvitationCreateSerializer(BaseApplicationCreateSerializer):
             raise ValidationError(
                 'You can not create an application for a not approved resident')
         return owner
+
+    def validate(self, attrs):
+        shift = attrs['shift']
+        owner = attrs['owner']
+
+        self.validate_uniqueness(shift, owner)
+
+        return attrs

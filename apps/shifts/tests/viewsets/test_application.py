@@ -93,6 +93,22 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
             resp.data['shift'],
             ['You can not create an application for not suitable shift'])
 
+    def test_apply_second_time_by_approved_resident_failed(self):
+        self.authenticate_as_resident(self.approved_resident)
+
+        # Create an early-created application
+        ApplicationFactory.create(
+            owner=self.approved_resident, shift=self.first_shift)
+
+        data = self.get_apply_data()
+        resp = self.client.post(
+            '/api/shifts/application/apply/', data, format='json')
+
+        self.assertBadRequest(resp)
+        self.assertEqual(
+            resp.data['non_field_errors'],
+            ['There is an already created application for the shift'])
+
     @mock.patch(
         'apps.shifts.viewsets.application.process_application', autospec=True)
     def test_apply_by_approved_resident_success(
@@ -195,6 +211,22 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         self.assertEqual(
             resp.data['shift'],
             ['You can not create an application for coverage completed shift'])
+
+    def test_invite_second_time_by_approved_resident_failed(self):
+        self.authenticate_as_scheduler()
+
+        # Create an early-created application
+        ApplicationFactory.create(
+            owner=self.approved_resident, shift=self.first_shift)
+
+        data = self.get_invite_data()
+        resp = self.client.post(
+            '/api/shifts/application/invite/', data, format='json')
+
+        self.assertBadRequest(resp)
+        self.assertEqual(
+            resp.data['non_field_errors'],
+            ['There is an already created application for the shift'])
 
     @mock.patch(
         'apps.shifts.viewsets.application.process_invitation', autospec=True)
