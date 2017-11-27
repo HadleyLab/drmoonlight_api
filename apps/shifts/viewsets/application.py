@@ -11,12 +11,20 @@ from apps.shifts.permissions import (
     ApplicationInvitePermission)
 from apps.shifts.serializers import (
     ApplicationSerializer, ApplicationCreateSerializer,
-    InvitationCreateSerializer)
+    InvitationCreateSerializer, ApplicationTransitionSerializer)
 from apps.shifts.services.application import (
     process_application, process_invitation)
 
 
-@add_transition_actions
+@add_transition_actions(
+    serializers={
+        'approve': ApplicationTransitionSerializer,
+        'reject': ApplicationTransitionSerializer,
+        'confirm': ApplicationTransitionSerializer,
+        'cancel': ApplicationTransitionSerializer,
+        'complete': ApplicationTransitionSerializer,
+    }
+)
 class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
@@ -49,9 +57,7 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
 
     @transaction.atomic
     def perform_apply(self, serializer):
-        user = self.request.user
-
-        instance = serializer.save(owner=user.resident)
+        instance = serializer.save()
         process_application(instance)
 
         return instance

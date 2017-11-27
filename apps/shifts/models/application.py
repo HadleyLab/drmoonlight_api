@@ -2,8 +2,16 @@ from django.db import models
 from django.db.models import Count, Case, When
 from django_fsm import FSMIntegerField, transition, RETURN_VALUE
 
-from apps.accounts.models import Resident
 from apps.main.models import TimestampModelMixin
+from apps.shifts.services.application import (
+    process_application_approving,
+    process_application_cancelling,
+    process_application_completing,
+    process_application_confirming,
+    process_application_postponing,
+    process_application_renewing,
+    process_application_rejecting
+)
 
 
 class ApplicationStateEnum(object):
@@ -126,7 +134,7 @@ class Application(TimestampModelMixin, models.Model):
     applications become new.
     """
     owner = models.ForeignKey(
-        Resident,
+        'accounts.Resident',
         related_name='applications',
         verbose_name='Owner'
     )
@@ -162,7 +170,7 @@ class Application(TimestampModelMixin, models.Model):
                 source=ApplicationStateEnum.NEW,
                 target=ApplicationStateEnum.APPROVED,
                 permission=can_scheduler_change_application)
-    def approve(self):
+    def approve(self, data):
         """
         Approves the application and postpone all other
         new applications
@@ -174,6 +182,8 @@ class Application(TimestampModelMixin, models.Model):
             application.postpone()
             application.save()
 
+        process_application_approving(self, data['user'], data['message'])
+
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,
                 target=ApplicationStateEnum.POSTPONED,
@@ -182,7 +192,7 @@ class Application(TimestampModelMixin, models.Model):
         """
         Postpones the application
         """
-        pass
+        process_application_postponing(self)
 
     @transition(field=state,
                 source=ApplicationStateEnum.POSTPONED,
@@ -192,28 +202,27 @@ class Application(TimestampModelMixin, models.Model):
         """
         Renews the application
         """
-        # TODO: send notification to POSTPONED application's owners
-        # TODO: about shift availability
-        pass
+        process_application_renewing(self)
 
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,
                 target=ApplicationStateEnum.REJECTED,
                 permission=can_scheduler_change_application)
-    def reject(self):
+    def reject(self, data):
         """
         Rejects  the application
         """
+        process_application_rejecting(self, data['user'], data['message'])
 
     @transition(field=state,
                 source=ApplicationStateEnum.APPROVED,
                 target=ApplicationStateEnum.CONFIRMED,
                 permission=can_resident_change_application)
-    def confirm(self):
+    def confirm(self, data):
         """
         Confirms the application
         """
-        pass
+        process_application_confirming(self, data['user'], data['message'])
 
     @transition(field=state,
                 source=[
@@ -225,11 +234,13 @@ class Application(TimestampModelMixin, models.Model):
                     ApplicationStateEnum.FAILED,
                 ),
                 permission=can_resident_or_scheduler_change_application)
-    def cancel(self):
+    def cancel(self, data):
         """
         Cancels the application and renew all postponed applications if
         the shift wasn't started
         """
+        process_application_cancelling(self, data['user'], data['message'])
+
         if not self.shift.is_started:
             postponed_applications = self.shift.applications.filter(
                 state=ApplicationStateEnum.POSTPONED)
@@ -246,10 +257,11 @@ class Application(TimestampModelMixin, models.Model):
     @transition(field=state,
                 source=ApplicationStateEnum.CONFIRMED,
                 target=ApplicationStateEnum.COMPLETED,
-                permission=can_scheduler_change_application)
-    def complete(self):
+                permission=can_scheduler_change_application,
+                # TODO: check that now() >= shift.date_end in can_proceed
+    )
+    def complete(self, data):
         """
         Completes the application
         """
-        # TODO: check that now() >= shift.date_end
-        pass
+        process_application_completing(self, data['user'], data['message'])

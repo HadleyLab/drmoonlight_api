@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from apps.accounts.serializers import ResidentSerializer
+from apps.accounts.serializers import (
+    ResidentSerializer, CurrentUserResidentDefault)
 from apps.main.serializers import FSMAvailableUserTransitionsField
 from apps.shifts.models import Application, Shift
 from .message import MessageSerializer
@@ -24,15 +25,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
 class BaseApplicationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
-        fields = ('pk', 'shift', )
-
-    def validate_uniqueness(self, shift, owner):
-        existing_applications = Application.objects.filter(
-            owner=owner, shift=shift)
-
-        if existing_applications.exists():
-            raise ValidationError(
-                'There is an already created application for the shift')
+        fields = ('pk', 'owner', 'shift', )
 
     def validate_shift(self, shift):
         if shift.is_started:
@@ -46,11 +39,21 @@ class BaseApplicationCreateSerializer(serializers.ModelSerializer):
 
         return shift
 
+    def validate(self, attrs):
+        shift = attrs['shift']
+        owner = attrs['owner']
+        existing_applications = Application.objects.filter(
+            owner=owner, shift=shift)
+
+        if existing_applications.exists():
+            raise ValidationError(
+                'There is an already created application for the shift')
+
+        return attrs
+
 
 class ApplicationCreateSerializer(BaseApplicationCreateSerializer):
-    class Meta:
-        model = Application
-        fields = ('pk', 'shift', )
+    owner = serializers.HiddenField(default=CurrentUserResidentDefault())
 
     def validate_shift(self, shift):
         shift = super(ApplicationCreateSerializer, self).validate_shift(shift)
@@ -66,14 +69,6 @@ class ApplicationCreateSerializer(BaseApplicationCreateSerializer):
                 'You can not create an application for not suitable shift')
 
         return shift
-
-    def validate(self, attrs):
-        shift = attrs['shift']
-        user = self.context['request'].user
-
-        self.validate_uniqueness(shift, user.resident)
-
-        return attrs
 
 
 class InvitationCreateSerializer(BaseApplicationCreateSerializer):
@@ -101,10 +96,10 @@ class InvitationCreateSerializer(BaseApplicationCreateSerializer):
                 'You can not create an application for a not approved resident')
         return owner
 
-    def validate(self, attrs):
-        shift = attrs['shift']
-        owner = attrs['owner']
 
-        self.validate_uniqueness(shift, owner)
+class ApplicationTransitionSerializer(serializers.Serializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    message = serializers.CharField(required=True)
 
-        return attrs
+    class Meta:
+        fields = ('user', 'message', )

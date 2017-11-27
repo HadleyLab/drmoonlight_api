@@ -4,3 +4,4 @@ from .resident import (
 from .scheduler import (
     SchedulerSerializer, SchedulerCreateSerializer, SchedulerUpdateSerializer)
 from .user import UserSerializer
+from .default import CurrentUserResidentDefault, CurrentUserSchedulerDefault

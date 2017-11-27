@@ -1,5 +1,5 @@
 from .shift import ShiftSerializer
 from .application import (
     ApplicationSerializer, ApplicationCreateSerializer,
-    InvitationCreateSerializer)
+    InvitationCreateSerializer, ApplicationTransitionSerializer)
 from .message import MessageSerializer
