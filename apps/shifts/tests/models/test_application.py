@@ -1,5 +1,6 @@
 from datetime import timedelta
-from django.test import TestCase
+
+from django.test import TestCase, mock
 from django.utils import timezone
 from django_fsm import has_transition_perm
 
@@ -92,8 +93,15 @@ class ApplicationTest(TestCase):
             ]
         )
 
-    def test_approve(self):
-        self.skipTest('Change tests')
+    def get_transition_data(self, **kwargs):
+        data = {'user': self.resident.user_ptr, 'message': 'message'}
+
+        data.update(kwargs)
+
+        return data
+
+    @mock.patch('apps.shifts.models.application.process_approving')
+    def test_approve(self, mock_process_approving):
         # New applications
         first_application = ApplicationFactory.create(shift=self.shift)
         second_application = ApplicationFactory.create(shift=self.shift)
@@ -105,7 +113,8 @@ class ApplicationTest(TestCase):
             shift=self.shift,
             state=ApplicationStateEnum.CANCELLED)
 
-        first_application.approve()
+        data = self.get_transition_data()
+        first_application.approve(data)
         first_application.save()
 
         first_application.refresh_from_db()
@@ -124,6 +133,9 @@ class ApplicationTest(TestCase):
         self.assertEqual(
             another_shift_application.state, ApplicationStateEnum.NEW)
 
+        mock_process_approving.assert_called_with(
+            first_application, data['user'], data['message'])
+
     def test_approve_permissions(self):
         application = ApplicationFactory.create(
             owner=self.resident, shift=self.shift)
@@ -141,14 +153,19 @@ class ApplicationTest(TestCase):
         self.assertFalse(has_transition_perm(
             another_application.approve, self.scheduler.user_ptr))
 
-    def test_reject(self):
-        self.skipTest('Change tests')
+    @mock.patch('apps.shifts.models.application.process_rejecting')
+    def test_reject(self, mock_process_rejecting):
+        data = self.get_transition_data()
 
         application = ApplicationFactory.create()
-        application.reject()
+        application.reject(data)
         application.save()
+
         application.refresh_from_db()
         self.assertEqual(application.state, ApplicationStateEnum.REJECTED)
+
+        mock_process_rejecting.assert_called_with(
+            application, data['user'], data['message'])
 
     def test_reject_permissions(self):
         application = ApplicationFactory.create(
@@ -162,15 +179,20 @@ class ApplicationTest(TestCase):
         self.assertTrue(has_transition_perm(
             application.reject, self.scheduler.user_ptr))
 
-    def test_confirm(self):
-        self.skipTest('Change tests')
+    @mock.patch('apps.shifts.models.application.process_confirming')
+    def test_confirm(self, mock_process_confirming):
+        data = self.get_transition_data()
 
         application = ApplicationFactory.create(
             state=ApplicationStateEnum.APPROVED)
-        application.confirm()
+        application.confirm(data)
         application.save()
+
         application.refresh_from_db()
         self.assertEqual(application.state, ApplicationStateEnum.CONFIRMED)
+
+        mock_process_confirming.assert_called_with(
+            application, data['user'], data['message'])
 
     def test_confirm_permissions(self):
         application = ApplicationFactory.create(
@@ -185,9 +207,8 @@ class ApplicationTest(TestCase):
         self.assertFalse(has_transition_perm(
             application.confirm, self.scheduler.user_ptr))
 
-    def test_cancel_approved_not_started(self):
-        self.skipTest('Change tests')
-
+    @mock.patch('apps.shifts.models.application.process_cancelling')
+    def test_cancel_approved_not_started(self, mock_process_cancelling):
         """
         Checks that cancelling an application for the not started shift
         makes the application cancelled and renews all postponed applications
@@ -206,8 +227,12 @@ class ApplicationTest(TestCase):
         application = ApplicationFactory.create(
             shift=self.shift,
             state=ApplicationStateEnum.APPROVED)
-        application.cancel()
+
+        data = self.get_transition_data()
+
+        application.cancel(data)
         application.save()
+
         application.refresh_from_db()
         self.assertEqual(application.state, ApplicationStateEnum.CANCELLED)
 
@@ -219,9 +244,11 @@ class ApplicationTest(TestCase):
             another_shift_postponed_application.state,
             ApplicationStateEnum.POSTPONED)
 
-    def test_cancel_confirmed_not_started(self):
-        self.skipTest('Change tests')
+        mock_process_cancelling.assert_called_with(
+            application, data['user'], data['message'])
 
+    @mock.patch('apps.shifts.models.application.process_cancelling')
+    def test_cancel_confirmed_not_started(self, mock_process_cancelling):
         """
         Checks that cancelling an application for the not started shift
         makes the application failed and renews all postponed applications
@@ -237,17 +264,23 @@ class ApplicationTest(TestCase):
         application = ApplicationFactory.create(
             shift=self.shift,
             state=ApplicationStateEnum.CONFIRMED)
-        application.cancel()
+
+        data = self.get_transition_data()
+
+        application.cancel(data)
         application.save()
+
         application.refresh_from_db()
         self.assertEqual(application.state, ApplicationStateEnum.FAILED)
 
         postponed_application.refresh_from_db()
         self.assertEqual(postponed_application.state, ApplicationStateEnum.NEW)
 
-    def test_cancel_started(self):
-        self.skipTest('Change tests')
+        mock_process_cancelling.assert_called_with(
+            application, data['user'], data['message'])
 
+    @mock.patch('apps.shifts.models.application.process_cancelling')
+    def test_cancel_started(self, mock_process_cancelling):
         """
         Checks that cancelling an application for the started shift
         makes the application failed and doesn't renew all postponed
@@ -264,13 +297,21 @@ class ApplicationTest(TestCase):
         application = ApplicationFactory.create(
             shift=self.shift,
             state=ApplicationStateEnum.APPROVED)
-        application.cancel()
+
+        data = self.get_transition_data()
+
+        application.cancel(data)
         application.save()
+
         application.refresh_from_db()
         self.assertEqual(application.state, ApplicationStateEnum.FAILED)
 
         postponed_application.refresh_from_db()
-        self.assertEqual(postponed_application.state, ApplicationStateEnum.POSTPONED)
+        self.assertEqual(
+            postponed_application.state, ApplicationStateEnum.POSTPONED)
+
+        mock_process_cancelling.assert_called_with(
+            application, data['user'], data['message'])
 
     def test_cancel_permissions(self):
         application = ApplicationFactory.create(
@@ -297,15 +338,21 @@ class ApplicationTest(TestCase):
         self.assertTrue(has_transition_perm(
             application.cancel, self.scheduler.user_ptr))
 
-    def test_complete(self):
-        self.skipTest('Change tests')
-
+    @mock.patch('apps.shifts.models.application.process_completing')
+    def test_complete(self, mock_process_completing):
         application = ApplicationFactory.create(
             state=ApplicationStateEnum.CONFIRMED)
-        application.complete()
+
+        data = self.get_transition_data()
+
+        application.complete(data)
         application.save()
+
         application.refresh_from_db()
         self.assertEqual(application.state, ApplicationStateEnum.COMPLETED)
+
+        mock_process_completing.assert_called_with(
+            application, data['user'], data['message'])
 
     def test_complete_permissions(self):
         application = ApplicationFactory.create(

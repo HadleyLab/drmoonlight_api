@@ -4,13 +4,13 @@ from django_fsm import FSMIntegerField, transition, RETURN_VALUE
 
 from apps.main.models import TimestampModelMixin
 from apps.shifts.services.application import (
-    process_application_approving,
-    process_application_cancelling,
-    process_application_completing,
-    process_application_confirming,
-    process_application_postponing,
-    process_application_renewing,
-    process_application_rejecting
+    process_approving,
+    process_cancelling,
+    process_completing,
+    process_confirming,
+    process_postponing,
+    process_renewing,
+    process_rejecting
 )
 
 
@@ -182,7 +182,7 @@ class Application(TimestampModelMixin, models.Model):
             application.postpone()
             application.save()
 
-        process_application_approving(self, data['user'], data['message'])
+        process_approving(self, data['user'], data['message'])
 
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,
@@ -192,7 +192,7 @@ class Application(TimestampModelMixin, models.Model):
         """
         Postpones the application
         """
-        process_application_postponing(self)
+        process_postponing(self)
 
     @transition(field=state,
                 source=ApplicationStateEnum.POSTPONED,
@@ -202,7 +202,7 @@ class Application(TimestampModelMixin, models.Model):
         """
         Renews the application
         """
-        process_application_renewing(self)
+        process_renewing(self)
 
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,
@@ -212,7 +212,7 @@ class Application(TimestampModelMixin, models.Model):
         """
         Rejects  the application
         """
-        process_application_rejecting(self, data['user'], data['message'])
+        process_rejecting(self, data['user'], data['message'])
 
     @transition(field=state,
                 source=ApplicationStateEnum.APPROVED,
@@ -222,7 +222,7 @@ class Application(TimestampModelMixin, models.Model):
         """
         Confirms the application
         """
-        process_application_confirming(self, data['user'], data['message'])
+        process_confirming(self, data['user'], data['message'])
 
     @transition(field=state,
                 source=[
@@ -239,7 +239,7 @@ class Application(TimestampModelMixin, models.Model):
         Cancels the application and renew all postponed applications if
         the shift wasn't started
         """
-        process_application_cancelling(self, data['user'], data['message'])
+        process_cancelling(self, data['user'], data['message'])
 
         if not self.shift.is_started:
             postponed_applications = self.shift.applications.filter(
@@ -264,4 +264,4 @@ class Application(TimestampModelMixin, models.Model):
         """
         Completes the application
         """
-        process_application_completing(self, data['user'], data['message'])
+        process_completing(self, data['user'], data['message'])

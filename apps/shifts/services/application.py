@@ -19,17 +19,17 @@ def create_message(application, user, message):
     return message
 
 
-def process_application_approving(application, user, message):
+def process_approving(application, user, message):
     # TODO: send email to the resident about approving
     create_message(application, user, message)
 
 
-def process_application_rejecting(application, user, message):
+def process_rejecting(application, user, message):
     # TODO: send email to the resident about postponing
     create_message(application, user, message)
 
 
-def process_application_postponing(application):
+def process_postponing(application):
     # TODO: send email to the resident about postponing
     create_message(
         application,
@@ -37,7 +37,7 @@ def process_application_postponing(application):
         "You application was postponed due to accepting an another application")
 
 
-def process_application_renewing(application):
+def process_renewing(application):
     # TODO: send email to application's owners about shift availability
     create_message(
         application,
@@ -45,16 +45,16 @@ def process_application_renewing(application):
         "The shift became available and your application was renewed")
 
 
-def process_application_confirming(application, user, message):
+def process_confirming(application, user, message):
     # TODO: send email to the scheduler about confirming
     create_message(application, user, message)
 
 
-def process_application_cancelling(application, user, message):
+def process_cancelling(application, user, message):
     # TODO: send email to the other side about cancelling
     create_message(application, user, message)
 
 
-def process_application_completing(application, user, message):
+def process_completing(application, user, message):
     # TODO: send email to the other side about completing
     create_message(application, user, message)
