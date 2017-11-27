@@ -51,7 +51,7 @@ def can_scheduler_change_application(instance, user):
 
 
 def can_resident_change_application(instance, user):
-    return user.is_resident and instance.owner == user
+    return user.is_resident and instance.owner == user.resident
 
 
 def can_resident_or_scheduler_change_application(instance, user):

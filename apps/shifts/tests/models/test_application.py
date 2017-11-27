@@ -130,16 +130,16 @@ class ApplicationTest(TestCase):
 
         # Resident can't approve application
         self.assertFalse(has_transition_perm(
-            application.approve, self.resident))
+            application.approve, self.resident.user_ptr))
 
         # Scheduler can accept own shift's applications
         self.assertTrue(has_transition_perm(
-            application.approve, self.scheduler))
+            application.approve, self.scheduler.user_ptr))
 
         another_application = ApplicationFactory.create()
         # Scheduler can't approve now own shift's applications
         self.assertFalse(has_transition_perm(
-            another_application.approve, self.scheduler))
+            another_application.approve, self.scheduler.user_ptr))
 
     def test_reject(self):
         self.skipTest('Change tests')
@@ -156,11 +156,11 @@ class ApplicationTest(TestCase):
 
         # Resident can't reject application
         self.assertFalse(has_transition_perm(
-            application.reject, self.resident))
+            application.reject, self.resident.user_ptr))
 
         # Scheduler can reject own shift's applications
         self.assertTrue(has_transition_perm(
-            application.reject, self.scheduler))
+            application.reject, self.scheduler.user_ptr))
 
     def test_confirm(self):
         self.skipTest('Change tests')
@@ -179,11 +179,11 @@ class ApplicationTest(TestCase):
 
         # Resident can confirm approved application
         self.assertTrue(has_transition_perm(
-            application.confirm, self.resident))
+            application.confirm, self.resident.user_ptr))
 
         # Scheduler can't confirm approved applications
         self.assertFalse(has_transition_perm(
-            application.confirm, self.scheduler))
+            application.confirm, self.scheduler.user_ptr))
 
     def test_cancel_approved_not_started(self):
         self.skipTest('Change tests')
@@ -279,11 +279,11 @@ class ApplicationTest(TestCase):
 
         # Resident can cancel approved application
         self.assertTrue(has_transition_perm(
-            application.cancel, self.resident))
+            application.cancel, self.resident.user_ptr))
 
         # Scheduler can cancel approved applications
         self.assertTrue(has_transition_perm(
-            application.cancel, self.scheduler))
+            application.cancel, self.scheduler.user_ptr))
 
         application = ApplicationFactory.create(
             owner=self.resident, shift=self.shift,
@@ -291,11 +291,11 @@ class ApplicationTest(TestCase):
 
         # Resident can cancel confirmed application
         self.assertTrue(has_transition_perm(
-            application.cancel, self.resident))
+            application.cancel, self.resident.user_ptr))
 
         # Scheduler can cancel confirmed applications
         self.assertTrue(has_transition_perm(
-            application.cancel, self.scheduler))
+            application.cancel, self.scheduler.user_ptr))
 
     def test_complete(self):
         self.skipTest('Change tests')
@@ -314,11 +314,11 @@ class ApplicationTest(TestCase):
 
         # Resident can't complete confirmed application
         self.assertFalse(has_transition_perm(
-            application.complete, self.resident))
+            application.complete, self.resident.user_ptr))
 
         # Scheduler can complete confirmed applications
         self.assertTrue(has_transition_perm(
-            application.complete, self.scheduler))
+            application.complete, self.scheduler.user_ptr))
 
     def test_last_message_when_do_not_have_messages_is_none(self):
         application = ApplicationFactory.create()
