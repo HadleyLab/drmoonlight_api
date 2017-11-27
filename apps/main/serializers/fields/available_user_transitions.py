@@ -15,8 +15,7 @@ class FSMAvailableUserTransitionsField(serializers.ReadOnlyField):
 
         user = request.user
 
-        Model = self.parent.Meta.model
-        state_model_field = Model._meta.get_field(self.state_field)
+        state_model_field = obj.__class__._meta.get_field(self.state_field)
         available_transitions = get_available_user_FIELD_transitions(
             obj, user, state_model_field)
 
