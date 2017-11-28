@@ -1,7 +1,9 @@
 import json
 
 from channels import Group
-from channels.test import ChannelTestCase
+from channels.test import TransactionChannelTestCase
+from django.db import transaction
+from django.test import override_settings
 
 from apps.accounts.factories import ResidentFactory, SchedulerFactory
 from apps.shifts.factories import MessageFactory, ApplicationFactory, \
@@ -10,7 +12,7 @@ from apps.shifts.notifications import notify_message_created, \
     notify_application_state_changed
 
 
-class NotificationsTestCase(ChannelTestCase):
+class NotificationsTestCase(TransactionChannelTestCase):
     def setUp(self):
         self.scheduler = SchedulerFactory.create()
         self.resident = ResidentFactory.create()
@@ -18,14 +20,16 @@ class NotificationsTestCase(ChannelTestCase):
         self.application = ApplicationFactory.create(
             shift=self.shift, owner=self.resident)
 
+    @override_settings(SYNC_ON_COMMIT=False)
     def test_notify_message_created(self):
-        message = MessageFactory.create(
-            application=self.application, owner=self.resident)
+        with transaction.atomic():
+            message = MessageFactory.create(
+                application=self.application, owner=self.resident)
 
-        Group('user-{0}'.format(self.resident.pk)).add('ws-resident')
-        Group('user-{0}'.format(self.scheduler.pk)).add('ws-scheduler')
+            Group('user-{0}'.format(self.resident.pk)).add('ws-resident')
+            Group('user-{0}'.format(self.scheduler.pk)).add('ws-scheduler')
 
-        notify_message_created(message)
+            notify_message_created(message)
 
         # Check message for a resident
         result = self.get_next_message('ws-resident')
@@ -41,14 +45,16 @@ class NotificationsTestCase(ChannelTestCase):
         self.assertEqual(parsed_result['event'], 'message_created')
         self.assertEqual(parsed_result['payload']['message']['pk'], message.pk)
 
+    @override_settings(SYNC_ON_COMMIT=False)
     def test_notify_application_state_changed(self):
-        message = MessageFactory.create(
-            application=self.application, owner=self.resident)
+        with transaction.atomic():
+            message = MessageFactory.create(
+                application=self.application, owner=self.resident)
 
-        Group('user-{0}'.format(self.resident.pk)).add('ws-resident')
-        Group('user-{0}'.format(self.scheduler.pk)).add('ws-scheduler')
+            Group('user-{0}'.format(self.resident.pk)).add('ws-resident')
+            Group('user-{0}'.format(self.scheduler.pk)).add('ws-scheduler')
 
-        notify_application_state_changed(self.application, message)
+            notify_application_state_changed(self.application, message)
 
         # Check message for a resident
         result = self.get_next_message('ws-resident')
