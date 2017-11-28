@@ -22,15 +22,6 @@ class ApplicationSerializer(serializers.ModelSerializer):
                   'messages_count', 'last_message', 'available_transitions', )
 
 
-class ApplicationNotifySerializer(serializers.ModelSerializer):
-    owner = ResidentSerializer()
-    shift = ShiftSerializer()
-
-    class Meta:
-        model = Application
-        fields = ('pk', 'date_created', 'owner', 'shift', 'state', )
-
-
 class BaseApplicationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
@@ -108,7 +99,8 @@ class InvitationCreateSerializer(BaseApplicationCreateSerializer):
 
 class ApplicationTransitionSerializer(serializers.Serializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    message = serializers.CharField(required=True)
+    text = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True)
 
     class Meta:
-        fields = ('user', 'message', )
+        fields = ('user', 'text', )

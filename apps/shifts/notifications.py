@@ -1,33 +1,39 @@
-from apps.accounts.notifications import notify_users
+from apps.accounts.notifications import notify_user
+from apps.main.serializers.utils import get_request_user_context
 
 
-def notify_application_users(application, event, payload):
-    notify_users([application.owner, application.shift.owner], event, payload)
+def notify_application_state_changed(application, message=None):
+    from apps.shifts.serializers import (
+        ApplicationSerializer, MessageSerializer)
 
+    for user in [application.owner, application.shift.owner]:
+        context = get_request_user_context(user)
 
-def notify_about_application(application, event):
-    from apps.shifts.serializers import ApplicationNotifySerializer
-
-    notify_application_users(
-        application,
-        event,
-        ApplicationNotifySerializer(application).data
-    )
-
-
-def notify_application_state_changed(application):
-    notify_about_application(application, 'application_state_changed')
-
-
-def notify_application_created(application):
-    notify_about_application(application, 'application_created')
+        notify_user(
+            user,
+            'application_state_changed',
+            lambda: {
+                'application': ApplicationSerializer(
+                    application, context=context).data,
+                'message':
+                    MessageSerializer(message, context=context).data
+                    if message else None,
+            }
+        )
 
 
 def notify_message_created(message):
-    from apps.shifts.serializers import MessageNotifySerializer
+    from apps.shifts.serializers import MessageSerializer
 
-    notify_application_users(
-        message.application,
-        'message_created',
-        {'message': MessageNotifySerializer(message).data}
-    )
+    application = message.application
+
+    for user in [application.owner, application.shift.owner]:
+        context = get_request_user_context(user)
+
+        notify_user(
+            user,
+            'message_created',
+            lambda: {
+                'message': MessageSerializer(message, context=context).data,
+            }
+        )

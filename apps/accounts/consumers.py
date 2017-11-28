@@ -11,18 +11,18 @@ class UserConsumer(JsonWebsocketConsumer):
 
         return None
 
-    def connection_groups(self, **kwargs):
-        user = self.get_user(**kwargs)
+    def connection_groups(self, key):
+        user = self.get_user(key)
 
         if user:
             return ['user-{0}'.format(user.pk)]
 
         return []
 
-    def raw_connect(self, message, **kwargs):
-        user = self.get_user(**kwargs)
+    def raw_connect(self, message, key):
+        user = self.get_user(key)
 
         if user:
-            super(UserConsumer, self).raw_connect(message, **kwargs)
+            super(UserConsumer, self).raw_connect(message, key=key)
         else:
             self.close()
