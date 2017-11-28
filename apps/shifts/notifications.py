@@ -3,37 +3,39 @@ from apps.main.serializers.utils import get_request_user_context
 
 
 def notify_application_state_changed(application, message=None):
-    from apps.shifts.serializers import (
-        ApplicationSerializer, MessageSerializer)
+    def get_payload_fn(context):
+        from apps.shifts.serializers import (
+            ApplicationSerializer, MessageSerializer)
+
+        return lambda: {
+            'application': ApplicationSerializer(
+                application, context=context).data,
+            'message':
+                MessageSerializer(message, context=context).data
+                if message else None,
+        }
 
     for user in [application.owner, application.shift.owner]:
-        context = get_request_user_context(user)
-
         notify_user(
             user,
             'application_state_changed',
-            lambda: {
-                'application': ApplicationSerializer(
-                    application, context=context).data,
-                'message':
-                    MessageSerializer(message, context=context).data
-                    if message else None,
-            }
+            get_payload_fn(get_request_user_context(user))
         )
 
 
 def notify_message_created(message):
-    from apps.shifts.serializers import MessageSerializer
-
     application = message.application
 
-    for user in [application.owner, application.shift.owner]:
-        context = get_request_user_context(user)
+    def get_payload_fn(context):
+        from apps.shifts.serializers import MessageSerializer
 
+        return lambda: {
+            'message': MessageSerializer(message, context=context).data,
+        }
+
+    for user in [application.owner, application.shift.owner]:
         notify_user(
             user,
             'message_created',
-            lambda: {
-                'message': MessageSerializer(message, context=context).data,
-            }
+            get_payload_fn(get_request_user_context(user))
         )
