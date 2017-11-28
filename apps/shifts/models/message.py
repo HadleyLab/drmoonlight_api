@@ -14,8 +14,8 @@ class Message(TimestampModelMixin, models.Model):
         related_name='messages',
         verbose_name='Application'
     )
-    message = models.TextField(
-        verbose_name='Message'
+    text = models.TextField(
+        verbose_name='Text'
     )
 
     class Meta:

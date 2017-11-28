@@ -76,6 +76,7 @@ PROJECT_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    'channels',
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
@@ -182,18 +183,28 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
-    'DOMAIN': os.environ.get('DJOSER_DOMAIN', 'localhost:8000'),
-    'SITE_NAME': 'SkinIQ',
+    'DOMAIN': os.environ.get('DJOSER_DOMAIN', 'localhost:3000'),
+    'SITE_NAME': 'Dr. Moonlight',
     'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
-        # TODO: change this url
         'DJOSER_PASSWORD_RESET_CONFIRM_URL',
-        '/confirm/{uid}/{token}'),
+        '#/confirm/{uid}/{token}'),
     'ACTIVATION_URL': os.environ.get(
         'DJOSER_ACTIVATION_URL',
-        # TODO: change this url
-        '/activate/{uid}/{token}'),
+        '#/activate/{uid}/{token}'),
     'SEND_ACTIVATION_EMAIL': True,
 }
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [BROKER_URL],
+        },
+        "ROUTING": "drmoonlight.routing.channel_routing",
+    },
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -278,6 +289,17 @@ if RUN_TESTS:
 
     CELERY_ALWAYS_EAGER = True
     CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+
+    CHANNEL_LAYERS['default']['BACKEND'] = "asgiref.inmemory.ChannelLayer"
+    CHANNEL_LAYERS['default']['CONFIG'] = {
+        'capacity': 10000,
+    }
+
+    DATABASES = {
+        'default': dj_database_url.config(
+            engine='libs.postgresql_psycopg2_for_tests')
+    }
+
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'

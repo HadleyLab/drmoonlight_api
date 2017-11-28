@@ -91,13 +91,13 @@ class ApplicationQuerySet(models.QuerySet):
 
     def annotate_messages_count(self):
         return self.annotate(
-            messages_count=Count('messages', distinct=True)
+            annotated_messages_count=Count('messages', distinct=True)
         )
 
     def order_by_without_messages_first(self):
         return self.annotate_messages_count().annotate(
             without_messages=Case(
-                When(messages_count=0, then=True),
+                When(annotated_messages_count=0, then=True),
                 default=False,
                 output_field=models.BooleanField()
             )
@@ -158,6 +158,12 @@ class Application(TimestampModelMixin, models.Model):
         return "{0} by {1}".format(self.shift, self.owner)
 
     @property
+    def messages_count(self):
+        if hasattr(self, 'annotated_messages_count'):
+            return self.annotated_messages_count
+        return self.messages.count()
+
+    @property
     def last_message(self):
         """
         Returns last message for the applications (sorted by date)
@@ -182,7 +188,7 @@ class Application(TimestampModelMixin, models.Model):
             application.postpone()
             application.save()
 
-        process_approving(self, data['user'], data['message'])
+        process_approving(self, data['user'], data['text'])
 
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,
@@ -212,7 +218,7 @@ class Application(TimestampModelMixin, models.Model):
         """
         Rejects  the application
         """
-        process_rejecting(self, data['user'], data['message'])
+        process_rejecting(self, data['user'], data['text'])
 
     @transition(field=state,
                 source=ApplicationStateEnum.APPROVED,
@@ -222,7 +228,7 @@ class Application(TimestampModelMixin, models.Model):
         """
         Confirms the application
         """
-        process_confirming(self, data['user'], data['message'])
+        process_confirming(self, data['user'], data['text'])
 
     @transition(field=state,
                 source=[
@@ -239,7 +245,7 @@ class Application(TimestampModelMixin, models.Model):
         Cancels the application and renew all postponed applications if
         the shift wasn't started
         """
-        process_cancelling(self, data['user'], data['message'])
+        process_cancelling(self, data['user'], data['text'])
 
         if not self.shift.is_started:
             postponed_applications = self.shift.applications.filter(
@@ -264,4 +270,4 @@ class Application(TimestampModelMixin, models.Model):
         """
         Completes the application
         """
-        process_completing(self, data['user'], data['message'])
+        process_completing(self, data['user'], data['text'])

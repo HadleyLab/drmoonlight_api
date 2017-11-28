@@ -99,7 +99,8 @@ class InvitationCreateSerializer(BaseApplicationCreateSerializer):
 
 class ApplicationTransitionSerializer(serializers.Serializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    message = serializers.CharField(required=True)
+    text = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True)
 
     class Meta:
-        fields = ('user', 'message', )
+        fields = ('user', 'text', )

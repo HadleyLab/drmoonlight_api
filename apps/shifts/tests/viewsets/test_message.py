@@ -100,7 +100,7 @@ class MessageViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
 
     def get_message_data(self, **kwargs):
         data = {
-            'message': 'Message',
+            'text': 'Message',
         }
         data.update(**kwargs)
 
@@ -175,7 +175,7 @@ class MessageViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
 
         message = self.first_application.messages.get(pk=resp.data['pk'])
         self.assertEqual(message.owner, self.scheduler.user_ptr)
-        self.assertEqual(message.message, data['message'])
+        self.assertEqual(message.text, data['text'])
         mock_process_message_creation.assert_called_with(message)
 
     @mock.patch(
@@ -194,7 +194,7 @@ class MessageViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
 
         message = self.first_application.messages.get(pk=resp.data['pk'])
         self.assertEqual(message.owner, self.approved_resident.user_ptr)
-        self.assertEqual(message.message, data['message'])
+        self.assertEqual(message.text, data['text'])
         mock_process_message_creation.assert_called_with(message)
 
 

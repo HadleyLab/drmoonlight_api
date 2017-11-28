@@ -94,7 +94,7 @@ class ApplicationTest(TestCase):
         )
 
     def get_transition_data(self, **kwargs):
-        data = {'user': self.resident.user_ptr, 'message': 'message'}
+        data = {'user': self.resident.user_ptr, 'text': 'message'}
 
         data.update(kwargs)
 
@@ -134,7 +134,7 @@ class ApplicationTest(TestCase):
             another_shift_application.state, ApplicationStateEnum.NEW)
 
         mock_process_approving.assert_called_with(
-            first_application, data['user'], data['message'])
+            first_application, data['user'], data['text'])
 
     def test_approve_permissions(self):
         application = ApplicationFactory.create(
@@ -165,7 +165,7 @@ class ApplicationTest(TestCase):
         self.assertEqual(application.state, ApplicationStateEnum.REJECTED)
 
         mock_process_rejecting.assert_called_with(
-            application, data['user'], data['message'])
+            application, data['user'], data['text'])
 
     def test_reject_permissions(self):
         application = ApplicationFactory.create(
@@ -192,7 +192,7 @@ class ApplicationTest(TestCase):
         self.assertEqual(application.state, ApplicationStateEnum.CONFIRMED)
 
         mock_process_confirming.assert_called_with(
-            application, data['user'], data['message'])
+            application, data['user'], data['text'])
 
     def test_confirm_permissions(self):
         application = ApplicationFactory.create(
@@ -245,7 +245,7 @@ class ApplicationTest(TestCase):
             ApplicationStateEnum.POSTPONED)
 
         mock_process_cancelling.assert_called_with(
-            application, data['user'], data['message'])
+            application, data['user'], data['text'])
 
     @mock.patch('apps.shifts.models.application.process_cancelling')
     def test_cancel_confirmed_not_started(self, mock_process_cancelling):
@@ -277,7 +277,7 @@ class ApplicationTest(TestCase):
         self.assertEqual(postponed_application.state, ApplicationStateEnum.NEW)
 
         mock_process_cancelling.assert_called_with(
-            application, data['user'], data['message'])
+            application, data['user'], data['text'])
 
     @mock.patch('apps.shifts.models.application.process_cancelling')
     def test_cancel_started(self, mock_process_cancelling):
@@ -311,7 +311,7 @@ class ApplicationTest(TestCase):
             postponed_application.state, ApplicationStateEnum.POSTPONED)
 
         mock_process_cancelling.assert_called_with(
-            application, data['user'], data['message'])
+            application, data['user'], data['text'])
 
     def test_cancel_permissions(self):
         application = ApplicationFactory.create(
@@ -352,7 +352,7 @@ class ApplicationTest(TestCase):
         self.assertEqual(application.state, ApplicationStateEnum.COMPLETED)
 
         mock_process_completing.assert_called_with(
-            application, data['user'], data['message'])
+            application, data['user'], data['text'])
 
     def test_complete_permissions(self):
         application = ApplicationFactory.create(
