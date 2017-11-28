@@ -1,7 +1,7 @@
 import json
 
 from channels import Group
-from channels.test import TransactionChannelTestCase
+from channels.test import ChannelTestCase
 
 from apps.accounts.factories import ResidentFactory, SchedulerFactory
 from apps.shifts.factories import MessageFactory, ApplicationFactory, \
@@ -10,7 +10,7 @@ from apps.shifts.notifications import notify_message_created, \
     notify_application_state_changed
 
 
-class NotificationsTestCase(TransactionChannelTestCase):
+class NotificationsTestCase(ChannelTestCase):
     def setUp(self):
         self.scheduler = SchedulerFactory.create()
         self.resident = ResidentFactory.create()
