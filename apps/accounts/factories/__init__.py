@@ -6,3 +6,4 @@ from .superuser import SuperUserFactory
 
 from .speciality import SpecialityFactory
 from .residency_program import ResidencyProgramFactory
+from .token import TokenFactory
