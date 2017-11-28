@@ -182,8 +182,10 @@ REST_FRAMEWORK = {
     ),
 }
 
+DOMAIN = os.environ.get('DJOSER_DOMAIN', 'localhost:3000')
+
 DJOSER = {
-    'DOMAIN': os.environ.get('DJOSER_DOMAIN', 'localhost:3000'),
+    'DOMAIN': DOMAIN,
     'SITE_NAME': 'Dr. Moonlight',
     'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
         'DJOSER_PASSWORD_RESET_CONFIRM_URL',

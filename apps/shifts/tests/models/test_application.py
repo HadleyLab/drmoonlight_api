@@ -100,7 +100,8 @@ class ApplicationTest(TestCase):
 
         return data
 
-    @mock.patch('apps.shifts.models.application.process_approving')
+    @mock.patch(
+        'apps.shifts.models.application.process_approving', autospec=True)
     def test_approve(self, mock_process_approving):
         # New applications
         first_application = ApplicationFactory.create(shift=self.shift)
@@ -153,7 +154,8 @@ class ApplicationTest(TestCase):
         self.assertFalse(has_transition_perm(
             another_application.approve, self.scheduler.user_ptr))
 
-    @mock.patch('apps.shifts.models.application.process_rejecting')
+    @mock.patch(
+        'apps.shifts.models.application.process_rejecting', autospec=True)
     def test_reject(self, mock_process_rejecting):
         data = self.get_transition_data()
 
@@ -179,7 +181,8 @@ class ApplicationTest(TestCase):
         self.assertTrue(has_transition_perm(
             application.reject, self.scheduler.user_ptr))
 
-    @mock.patch('apps.shifts.models.application.process_confirming')
+    @mock.patch(
+        'apps.shifts.models.application.process_confirming', autospec=True)
     def test_confirm(self, mock_process_confirming):
         data = self.get_transition_data()
 
@@ -207,7 +210,8 @@ class ApplicationTest(TestCase):
         self.assertFalse(has_transition_perm(
             application.confirm, self.scheduler.user_ptr))
 
-    @mock.patch('apps.shifts.models.application.process_cancelling')
+    @mock.patch(
+        'apps.shifts.models.application.process_cancelling', autospec=True)
     def test_cancel_approved_not_started(self, mock_process_cancelling):
         """
         Checks that cancelling an application for the not started shift
@@ -247,7 +251,8 @@ class ApplicationTest(TestCase):
         mock_process_cancelling.assert_called_with(
             application, data['user'], data['text'])
 
-    @mock.patch('apps.shifts.models.application.process_cancelling')
+    @mock.patch(
+        'apps.shifts.models.application.process_cancelling', autospec=True)
     def test_cancel_confirmed_not_started(self, mock_process_cancelling):
         """
         Checks that cancelling an application for the not started shift
@@ -279,7 +284,8 @@ class ApplicationTest(TestCase):
         mock_process_cancelling.assert_called_with(
             application, data['user'], data['text'])
 
-    @mock.patch('apps.shifts.models.application.process_cancelling')
+    @mock.patch(
+        'apps.shifts.models.application.process_cancelling', autospec=True)
     def test_cancel_started(self, mock_process_cancelling):
         """
         Checks that cancelling an application for the started shift
@@ -338,7 +344,8 @@ class ApplicationTest(TestCase):
         self.assertTrue(has_transition_perm(
             application.cancel, self.scheduler.user_ptr))
 
-    @mock.patch('apps.shifts.models.application.process_completing')
+    @mock.patch(
+        'apps.shifts.models.application.process_completing', autospec=True)
     def test_complete(self, mock_process_completing):
         application = ApplicationFactory.create(
             state=ApplicationStateEnum.CONFIRMED)
