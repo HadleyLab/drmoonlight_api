@@ -22,13 +22,15 @@ class NotificationsTestCase(TransactionChannelTestCase):
 
     @override_settings(SYNC_ON_COMMIT=False)
     def test_notify_message_created(self):
+        message = MessageFactory.create(
+            application=self.application, owner=self.resident)
+
+        Group('user-{0}'.format(self.resident.pk)).add('ws-resident')
+        Group('user-{0}'.format(self.scheduler.pk)).add('ws-scheduler')
+
+        # Run notification inside the transaction, because
+        # it will send notifications at the commit
         with transaction.atomic():
-            message = MessageFactory.create(
-                application=self.application, owner=self.resident)
-
-            Group('user-{0}'.format(self.resident.pk)).add('ws-resident')
-            Group('user-{0}'.format(self.scheduler.pk)).add('ws-scheduler')
-
             notify_message_created(message)
 
         # Check message for a resident
@@ -47,13 +49,15 @@ class NotificationsTestCase(TransactionChannelTestCase):
 
     @override_settings(SYNC_ON_COMMIT=False)
     def test_notify_application_state_changed(self):
+        message = MessageFactory.create(
+            application=self.application, owner=self.resident)
+
+        Group('user-{0}'.format(self.resident.pk)).add('ws-resident')
+        Group('user-{0}'.format(self.scheduler.pk)).add('ws-scheduler')
+
+        # Run notification inside the transaction, because
+        # it will send notifications at the commit
         with transaction.atomic():
-            message = MessageFactory.create(
-                application=self.application, owner=self.resident)
-
-            Group('user-{0}'.format(self.resident.pk)).add('ws-resident')
-            Group('user-{0}'.format(self.scheduler.pk)).add('ws-scheduler')
-
             notify_application_state_changed(self.application, message)
 
         # Check message for a resident
