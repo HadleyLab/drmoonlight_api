@@ -5,7 +5,7 @@ from rest_framework.decorators import list_route
 from rest_framework.response import Response
 
 from apps.accounts.models import Resident, ResidentStateEnum
-from apps.accounts.permissions import ResidentPermission
+from apps.accounts.permissions import ResidentPermission, IsAccountManager
 from apps.accounts.serializers import (
     ResidentCreateSerializer, ResidentUpdateSerializer,
     ResidentFillProfileSerializer, ResidentSerializer)
@@ -31,18 +31,16 @@ class ResidentViewSet(mixins.CreateModelMixin,
 
         return self.serializer_class
 
-    @list_route()
-    def wating_for_approve(self, request):
-        user = request.user
-        if not user.is_authenticated or not user.is_account_manager:
-            return Response(status=403)
-        qs = Resident.objects.filter(state=ResidentStateEnum.PROFILE_FILLED)
-        serializer = self.get_serializer(qs, many=True)
-        return Response(serializer.data)
-
     def perform_create(self, serializer):
         user = serializer.save()
 
         context = {'user': user}
         to = [get_user_email(user)]
         email.ActivationEmail(self.request, context).send(to)
+
+    @list_route(permission_classes=(IsAccountManager, ))
+    def waiting_for_approval(self, request):
+        qs = Resident.objects.filter(state=ResidentStateEnum.PROFILE_FILLED)
+        serializer = self.get_serializer(qs, many=True)
+
+        return Response(serializer.data)

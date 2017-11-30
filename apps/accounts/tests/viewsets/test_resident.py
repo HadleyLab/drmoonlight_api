@@ -165,3 +165,30 @@ class ResidentViewSetTestCase(APITestCase):
         self.assertEqual(self.resident.state, ResidentStateEnum.REJECTED)
 
         # TODO: check that email sent
+
+    def test_get_waiting_for_approve_by_unauthentiated_failed(self):
+        resp = self.client.get('/api/accounts/resident/waiting_for_approval/')
+        self.assertForbidden(resp)
+
+    def test_get_waiting_for_approve_by_resident_failed(self):
+        self.authenticate_as_resident()
+
+        resp = self.client.get('/api/accounts/resident/waiting_for_approval/')
+        self.assertForbidden(resp)
+
+    def test_get_waiting_for_approve_by_scheduler_failed(self):
+        self.authenticate_as_scheduler()
+
+        resp = self.client.get('/api/accounts/resident/waiting_for_approval/')
+        self.assertForbidden(resp)
+
+    def test_get_waiting_for_approve_by_account_manager_success(self):
+        self.authenticate_as_account_manager()
+
+        ResidentFactory.create(state=ResidentStateEnum.PROFILE_FILLED)
+
+        resp = self.client.get('/api/accounts/resident/waiting_for_approval/')
+        self.assertSuccessResponse(resp)
+
+        # There is only one resident in profile filled state
+        self.assertEqual(len(resp.data), 1)
