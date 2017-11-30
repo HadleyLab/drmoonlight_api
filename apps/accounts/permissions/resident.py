@@ -12,7 +12,7 @@ class ResidentPermission(BasePermission):
             return False
 
         if request.method in SAFE_METHODS:
-            return user.is_account_manager or \
+            return user.is_account_manager or user.is_scheduler or \
                    user == obj.user_ptr
 
         if request.method in ['PUT', 'PATCH']:

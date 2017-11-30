@@ -49,11 +49,11 @@ class ResidentViewSetTestCase(APITestCase):
             self.resident.pk))
         self.assertForbidden(resp)
 
-    def test_retrieve_by_scheduler_failed(self):
+    def test_retrieve_by_scheduler_success(self):
         self.authenticate_as_scheduler()
         resp = self.client.get('/api/accounts/resident/{0}/'.format(
             self.resident.pk))
-        self.assertForbidden(resp)
+        self.assertSuccessResponse(resp)
 
     def test_retrieve_by_account_manager_success(self):
         self.authenticate_as_account_manager()
