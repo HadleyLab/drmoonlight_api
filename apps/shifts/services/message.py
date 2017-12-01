@@ -1,7 +1,8 @@
 from apps.accounts.services.user import get_user_context
 from apps.main.utils import async_send_mail
 from apps.shifts.notifications import notify_message_created
-from apps.shifts.services.shift import get_shift_context
+from .application import get_application_context
+from .shift import get_shift_context
 
 
 def get_opposite_side(message):
@@ -33,9 +34,7 @@ def process_message_creation(message, notify=True):
                     'source': get_user_context(message.owner),
                     'destination': get_user_context(destination),
                     'text': message.text,
-                    'application': {
-                        'pk': message.application.pk,
-                    },
+                    'application': get_application_context(message.application),
                     'shift': get_shift_context(message.application.shift),
                 }
             )

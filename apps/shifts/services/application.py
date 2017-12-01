@@ -1,14 +1,39 @@
+from apps.accounts.services.user import get_user_context
+from apps.main.utils import async_send_mail
 from apps.shifts.notifications import notify_application_state_changed
+from .shift import get_shift_context
+
+
+def get_application_context(application):
+    return {
+        'pk': application.pk,
+    }
 
 
 def process_application(application):
-    # TODO: send email to the shift's scheduler about new application
-    pass
+    async_send_mail(
+        'application_created',
+        application.shift.owner.email,
+        {
+            'scheduler': get_user_context(application.shift.owner),
+            'resident': get_user_context(application.owner),
+            'application': get_application_context(application),
+            'shift': get_shift_context(application.shift),
+        }
+    )
 
 
 def process_invitation(application):
-    # TODO: send email to the resident about invitation
-    pass
+    async_send_mail(
+        'invitation_created',
+        application.owner.email,
+        {
+            'scheduler': get_user_context(application.shift.owner),
+            'resident': get_user_context(application.owner),
+            'application': get_application_context(application),
+            'shift': get_shift_context(application.shift),
+        }
+    )
 
 
 def create_message(application, owner, text):

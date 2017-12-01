@@ -209,7 +209,70 @@ class Command(BaseCommand):
                 </p>
                 <p>
                     <a href="{{ protocol }}://{{ domain }}/#/{{ destination.role }}/messages/{{ shift.pk }}/discuss/{{ application.pk }}/">
-                        Open message dialog
+                        Open dialog
+                    </a>
+                </p>               
+                """,
+                'base': base_template,
+            }
+        )
+
+        # Destination: scheduler
+        MailTemplate.objects.update_or_create(
+            slug='application_created',
+            defaults={
+                'name': 'Application created',
+                'subject': 'New application from {{ resident.full_name }}',
+                'message': """
+                <p>
+                    Hello {{ scheduler.full_name }}!
+                </p>
+                <p></p>
+                <p>
+                    {{ resident.full_name }} applied for the shift:
+                </p>
+                <p>
+                    <b>Location:</b> {{ shift.facility_name }} at {{ shift.department_name }}<br />
+                    <b>Starts:</b> {{ shift.date_start }} <br />
+                    <b>Ends:</b> {{ shift.date_end }} <br />
+                    <b>Payment amount:</b> {{ shift.payment_amount }} {% if shift.payment_per_hour %}per hour{% endif %}<br />
+                    {{ shift.description }}
+                </p>
+                <p>
+                    <a href="{{ protocol }}://{{ domain }}/#/scheduler/messages/{{ shift.pk }}/discuss/{{ application.pk }}/">
+                        Review application
+                    </a>
+                </p>               
+                """,
+                'base': base_template,
+            }
+        )
+
+
+        # Destination: resident
+        MailTemplate.objects.update_or_create(
+            slug='invitiation_created',
+            defaults={
+                'name': 'Invitation created',
+                'subject': 'You are invited to the shift',
+                'message': """
+                <p>
+                    Hello {{ resident.full_name }}!
+                </p>
+                <p></p>
+                <p>
+                    You are invite to the shift:
+                </p>
+                <p>
+                    <b>Location:</b> {{ shift.facility_name }} at {{ shift.department_name }}<br />
+                    <b>Starts:</b> {{ shift.date_start }} <br />
+                    <b>Ends:</b> {{ shift.date_end }} <br />
+                    <b>Payment amount:</b> {{ shift.payment_amount }} {% if shift.payment_per_hour %}per hour{% endif %}<br />
+                    {{ shift.description }}
+                </p>
+                <p>
+                    <a href="{{ protocol }}://{{ domain }}/#/scheduler/messages/{{ shift.pk }}/discuss/{{ application.pk }}/">
+                        Review application
                     </a>
                 </p>               
                 """,
