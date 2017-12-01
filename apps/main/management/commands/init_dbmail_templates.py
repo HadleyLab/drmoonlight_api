@@ -66,7 +66,7 @@ class Command(BaseCommand):
                 </p>
                 <p></p>
                 <p>
-                    <a href="{{ protocol }}://{{ domain }}/#/account-manager/detail/{{ resident.pk }}">
+                    <a href="{{ protocol }}://{{ domain }}/#/account-manager/detail/{{ resident.pk }}/">
                         Go to the schedule
                     </a>
                 </p>
@@ -90,10 +90,93 @@ class Command(BaseCommand):
                     You are rejected to be an approved resident. You can update your profile and our staff will consider your profile again. 
                 </p>
                 <p>
-                    <a href="{{ protocol }}://{{ domain }}/#/resident/profile">
-                        Update profile 
+                    <a href="{{ protocol }}://{{ domain }}/#/resident/profile/">
+                        Update profile
                     </a>
                 </p>               
+                """,
+                'base': base_template,
+            }
+        )
+
+        # Destination: resident
+        MailTemplate.objects.update_or_create(
+            slug='shift_created',
+            defaults={
+                'name': 'Shift created',
+                'subject': 'A new suitable shift for you',
+                'message': """
+                <p>
+                    Hello {{ resident.full_name }}!
+                </p>
+                <p></p>
+                <p>
+                    There is a new suitable shift for you was created right now.
+                </p>
+                <p>
+                    <b>Location:</b> {{ shift.facility_name }} at {{ shift.department_name }}<br />
+                    <b>Starts:</b> {{ shift.date_start }} <br />
+                    <b>Ends:</b> {{ shift.date_end }} <br />
+                    <b>Payment amount:</b> {{ shift.payment_amount }} {% if shift.payment_per_hour %}per hour{% endif %}<br />
+                    {{ shift.description }}
+                </p>
+                <p>
+                    <a href="{{ protocol }}://{{ domain }}/#/resident/messages/{{ shift.pk }}/">
+                        Open the shift
+                    </a>
+                </p>               
+                """,
+                'base': base_template,
+            }
+        )
+
+        # Destination: resident
+        MailTemplate.objects.update_or_create(
+            slug='shift_updated',
+            defaults={
+                'name': 'Shift updated',
+                'subject': 'A shift was updated',
+                'message': """
+                <p>
+                    Hello {{ resident.full_name }}!
+                </p>
+                <p></p>
+                <p>
+                    {% if is_applicant %}
+                    The shift you applied for was changed.
+                    {% else %}
+                    Suitable shift for you was changed.
+                    {% endif %}
+                </p>
+                <p>
+                    <b>Location:</b> {{ shift.facility_name }} at {{ shift.department_name }}<br />
+                    <b>Starts:</b> {{ shift.date_start }} <br />
+                    <b>Ends:</b> {{ shift.date_end }} <br />
+                    <b>Payment amount:</b> {{ shift.payment_amount }} {% if shift.payment_per_hour %}per hour{% endif %}<br />
+                    {{ shift.description }}
+                </p>
+                <p>
+                    <a href="{{ protocol }}://{{ domain }}/#/resident/messages/{{ shift.pk }}/">
+                        Open the shift
+                    </a>
+                </p>               
+                """,
+                'base': base_template,
+            }
+        )
+
+        # Destination: resident
+        MailTemplate.objects.update_or_create(
+            slug='shift_deleted',
+            defaults={
+                'name': 'Shift deleted',
+                'subject': 'A shift was deleted',
+                'message': """
+                <p>
+                    Hello {{ resident.full_name }}!
+                </p>
+                <p></p>
+                The shift for {{ shift.facility_name }} at {{ shift.department_name }} which will start at {{ shift.date_start }} was deleted.    
                 """,
                 'base': base_template,
             }
