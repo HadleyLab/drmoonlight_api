@@ -13,10 +13,9 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os, sys
 import dj_database_url
 
+
 # Celery settings
-
-BROKER_URL = os.environ.get('BROKER_URL', 'amqp://guest:guest@localhost//')
-
+CELERY_BROKER_URL = os.environ.get('BROKER_URL', 'redis://redis/1')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -67,6 +66,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 ]
 
 PROJECT_APPS = [
@@ -76,6 +76,8 @@ PROJECT_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    'dbmail',
+    'ckeditor',
     'channels',
     'rest_framework',
     'rest_framework.authtoken',
@@ -182,11 +184,12 @@ REST_FRAMEWORK = {
     ),
 }
 
-DOMAIN = os.environ.get('DJOSER_DOMAIN', 'localhost:3000')
+DOMAIN = os.environ.get('DOMAIN', 'localhost:3000')
+PROTOCOL = 'http'
+SITE_NAME = 'Dr. Moonlight'
+SITE_ID = 1
 
 DJOSER = {
-    'DOMAIN': DOMAIN,
-    'SITE_NAME': 'Dr. Moonlight',
     'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
         'DJOSER_PASSWORD_RESET_CONFIRM_URL',
         '#/confirm/{uid}/{token}'),
@@ -196,17 +199,24 @@ DJOSER = {
     'SEND_ACTIVATION_EMAIL': True,
 }
 
-
+CHANNEL_REDIS_URL = os.environ.get('REDIS_URL', 'redis://redis/2')
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "asgi_redis.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [BROKER_URL],
+            "hosts": [CHANNEL_REDIS_URL],
         },
         "ROUTING": "drmoonlight.routing.channel_routing",
     },
 }
 
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    },
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -289,8 +299,8 @@ if RUN_TESTS:
             '--nocapture',
         ]
 
-    CELERY_ALWAYS_EAGER = True
-    CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
 
     CHANNEL_LAYERS['default']['BACKEND'] = "asgiref.inmemory.ChannelLayer"
     CHANNEL_LAYERS['default']['CONFIG'] = {

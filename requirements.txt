@@ -1,10 +1,12 @@
 asgi_redis==1.4.3
 boto==2.48.0
 babel==2.5.1
-celery==4.1.0
+celery==4.0.2
+kombu==4.0.2
 channels==1.1.8
 dj-database-url==0.4.2
 django-constance==2.0.0
+django-ckeditor==5.3.1
 django-filter==1.1.0
 django-fsm==2.6.0
 django-fsm-admin==1.2.4
@@ -14,6 +16,7 @@ Django==1.11.6
 djangorestframework==3.7.1
 django-cors-headers==2.1.0
 drf-nested-routers==0.90.0
+django-db-mailer==2.3.19
 djoser==1.0.1
 gunicorn==19.7.1
 Pillow==4.3.0
