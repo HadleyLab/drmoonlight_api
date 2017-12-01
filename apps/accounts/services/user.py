@@ -8,6 +8,10 @@ def get_user_context(user):
         'full_name': user.full_name,
         'username': user.username,
         'pk': user.pk,
+        'is_resident': user.is_resident,
+        'is_scheduler': user.is_scheduler,
+        'is_account_manager ': user.is_account_manager,
+        'role': user.role,
     }
 
 

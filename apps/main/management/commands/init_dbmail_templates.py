@@ -66,7 +66,7 @@ class Command(BaseCommand):
                 </p>
                 <p></p>
                 <p>
-                    <a href="{{ protocol }}://{{ domain }}/#/account-manager/detail/{{ resident.pk }}/">
+                    <a href="{{ protocol }}://{{ domain }}/#/resident/schedule/">
                         Go to the schedule
                     </a>
                 </p>
@@ -177,6 +177,41 @@ class Command(BaseCommand):
                 </p>
                 <p></p>
                 The shift for {{ shift.facility_name }} at {{ shift.department_name }} which will start at {{ shift.date_start }} was deleted.    
+                """,
+                'base': base_template,
+            }
+        )
+
+        # Destination: resident or scheduler
+        MailTemplate.objects.update_or_create(
+            slug='message_created',
+            defaults={
+                'name': 'Message created',
+                'subject': 'You received new message from {{ source.full_name }}',
+                'message': """
+                <p>
+                    Hello {{ destination.full_name }}!
+                </p>
+                <p></p>
+                <p>
+                    You received new message from {{ source.full_name }}:<br />
+                    {{ text }}
+                </p>
+                <p>
+                    <b>Shift details:</b>
+                </p>
+                <p>
+                    <b>Location:</b> {{ shift.facility_name }} at {{ shift.department_name }}<br />
+                    <b>Starts:</b> {{ shift.date_start }} <br />
+                    <b>Ends:</b> {{ shift.date_end }} <br />
+                    <b>Payment amount:</b> {{ shift.payment_amount }} {% if shift.payment_per_hour %}per hour{% endif %}<br />
+                    {{ shift.description }}
+                </p>
+                <p>
+                    <a href="{{ protocol }}://{{ domain }}/#/{{ destination.role }}/messages/{{ shift.pk }}/discuss/{{ application.pk }}/">
+                        Open message dialog
+                    </a>
+                </p>               
                 """,
                 'base': base_template,
             }

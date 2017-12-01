@@ -70,3 +70,14 @@ class User(AbstractUser):
     @property
     def is_account_manager(self):
         return hasattr(self, 'accountmanager')
+
+    @property
+    def role(self):
+        if self.is_account_manager:
+            return 'account_manager'
+        if self.is_scheduler:
+            return 'scheduler'
+        if self.is_resident:
+            return 'resident'
+
+        return 'user'
