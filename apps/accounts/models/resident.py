@@ -1,7 +1,9 @@
 from django.db import models
 from django_fsm import FSMIntegerField, transition
 
-from .user import User, UserManager
+from apps.accounts.services.resident import process_resident_approving, \
+    process_resident_rejecting, process_resident_profile_filling
+from .user import User
 from .speciality import Speciality
 from .residency_program import ResidencyProgram
 
@@ -19,7 +21,7 @@ class ResidentProfileSettingsMixin(models.Model):
         verbose_name='Has state licence',
         default=False
     )
-    state = models.CharField(
+    state_license_state = models.CharField(
         verbose_name='State licence\'s state',
         max_length=255,
         blank=True
@@ -97,6 +99,23 @@ def is_resident(instance, user):
     return user.is_resident and instance.user_ptr == user
 
 
+class ResidentQuerySet(models.QuerySet):
+    def filter_for_shift(self, shift):
+        """
+        Returns suitable approved residents
+        """
+        filter_kwargs = {
+            'residency_years__gte': shift.residency_years_required,
+            'specialities': shift.speciality,
+        }
+        if shift.residency_program:
+            filter_kwargs['residency_program'] = shift.residency_program
+
+        return self.filter(state=ResidentStateEnum.APPROVED).filter(
+            **filter_kwargs
+        )
+
+
 class Resident(ResidentNotificationSettingsMixin,
                ResidentProfileSettingsMixin, User):
     specialities = models.ManyToManyField(
@@ -119,7 +138,7 @@ class Resident(ResidentNotificationSettingsMixin,
         choices=ResidentStateEnum.CHOICES
     )
 
-    objects = UserManager()
+    objects = ResidentQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'Resident'
@@ -139,7 +158,7 @@ class Resident(ResidentNotificationSettingsMixin,
         for field, value in profile_data.items():
             setattr(self, field, value)
 
-        # TODO: send email to the managing editor
+        process_resident_profile_filling(self)
 
     @transition(
         field=state,
@@ -148,8 +167,7 @@ class Resident(ResidentNotificationSettingsMixin,
         permission=is_account_manager
     )
     def approve(self):
-        # TODO: send email to the resident
-        pass
+        process_resident_approving(self)
 
     @transition(
         field=state,
@@ -158,5 +176,4 @@ class Resident(ResidentNotificationSettingsMixin,
         permission=is_account_manager
     )
     def reject(self):
-        # TODO: send email to the resident
-        pass
+        process_resident_rejecting(self)

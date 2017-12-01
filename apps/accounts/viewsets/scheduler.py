@@ -1,11 +1,10 @@
-from djoser import email
-from djoser.compat import get_user_email
 from rest_framework import viewsets, mixins
 
 from apps.accounts.models import Scheduler
 from apps.accounts.permissions import SchedulerPermission
 from apps.accounts.serializers import (
     SchedulerCreateSerializer, SchedulerUpdateSerializer, SchedulerSerializer)
+from apps.accounts.services.user import process_user_creation
 
 
 class SchedulerViewSet(mixins.CreateModelMixin,
@@ -26,8 +25,6 @@ class SchedulerViewSet(mixins.CreateModelMixin,
         return self.serializer_class
 
     def perform_create(self, serializer):
-        user = serializer.save()
+        scheduler = serializer.save()
 
-        context = {'user': user}
-        to = [get_user_email(user)]
-        email.ActivationEmail(self.request, context).send(to)
+        process_user_creation(scheduler)

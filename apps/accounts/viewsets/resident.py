@@ -1,5 +1,3 @@
-from djoser import email
-from djoser.compat import get_user_email
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
@@ -9,6 +7,7 @@ from apps.accounts.permissions import ResidentPermission, IsAccountManager
 from apps.accounts.serializers import (
     ResidentCreateSerializer, ResidentUpdateSerializer,
     ResidentFillProfileSerializer, ResidentSerializer)
+from apps.accounts.services.user import process_user_creation
 from apps.main.viewsets import add_transition_actions
 
 
@@ -32,11 +31,9 @@ class ResidentViewSet(mixins.CreateModelMixin,
         return self.serializer_class
 
     def perform_create(self, serializer):
-        user = serializer.save()
+        resident = serializer.save()
 
-        context = {'user': user}
-        to = [get_user_email(user)]
-        email.ActivationEmail(self.request, context).send(to)
+        process_user_creation(resident)
 
     @list_route(permission_classes=(IsAccountManager, ))
     def waiting_for_approval(self, request):

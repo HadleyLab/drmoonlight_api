@@ -26,8 +26,8 @@ class ResidentUpdateSerializer(serializers.ModelSerializer):
 
             # Not required fields
             'earliest_availability_for_shift', 'preferences_for_work_location',
-            'state_license', 'state', 'federal_dea_active', 'bls_acls_pals',
-            'active_permanent_residence_card_or_visa',
+            'state_license', 'state_license_state', 'federal_dea_active',
+            'bls_acls_pals', 'active_permanent_residence_card_or_visa',
             'active_current_driver_license_or_passport', 'active_npi_number',
             'ecfmg', 'active_board_certificates',
 
@@ -37,9 +37,9 @@ class ResidentUpdateSerializer(serializers.ModelSerializer):
             'notification_new_messages',
         )
         extra_kwargs = {
-            'residency_program': {'required': True, },
-            'residency_years': {'required': True, },
-            'specialities': {'required': True, },
+            'residency_program': {'required': True, 'allow_null': False, },
+            'residency_years': {'required': True, 'allow_null': False, },
+            'specialities': {'required': True, 'allow_empty': False, },
         }
 
 
@@ -52,8 +52,8 @@ class ResidentFillProfileSerializer(ResidentUpdateSerializer):
 
             # Not required fields
             'earliest_availability_for_shift', 'preferences_for_work_location',
-            'state_license', 'state', 'federal_dea_active', 'bls_acls_pals',
-            'active_permanent_residence_card_or_visa',
+            'state_license', 'state_license_state', 'federal_dea_active',
+            'bls_acls_pals', 'active_permanent_residence_card_or_visa',
             'active_current_driver_license_or_passport', 'active_npi_number',
             'ecfmg', 'active_board_certificates',
         )

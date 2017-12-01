@@ -136,8 +136,6 @@ class ResidentViewSetTestCase(APITestCase):
             data['residency_program'])
         self.assertEqual(self.resident.residency_years, data['residency_years'])
 
-        # TODO: check that email sent
-
     def test_approve_by_account_manager_success(self):
         self.resident.state = ResidentStateEnum.PROFILE_FILLED
         self.resident.save(update_fields=['state'])
@@ -150,8 +148,6 @@ class ResidentViewSetTestCase(APITestCase):
         self.resident.refresh_from_db()
         self.assertEqual(self.resident.state, ResidentStateEnum.APPROVED)
 
-        # TODO: check that email sent
-
     def test_reject_by_account_manager_success(self):
         self.resident.state = ResidentStateEnum.PROFILE_FILLED
         self.resident.save(update_fields=['state'])
@@ -163,8 +159,6 @@ class ResidentViewSetTestCase(APITestCase):
 
         self.resident.refresh_from_db()
         self.assertEqual(self.resident.state, ResidentStateEnum.REJECTED)
-
-        # TODO: check that email sent
 
     def test_get_waiting_for_approve_by_unauthentiated_failed(self):
         resp = self.client.get('/api/accounts/resident/waiting_for_approval/')
