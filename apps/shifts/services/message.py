@@ -1,25 +1,29 @@
 from apps.accounts.services.user import get_user_context
 from apps.main.utils import async_send_mail
 from apps.shifts.notifications import notify_message_created
-from .application import get_application_context
 from .shift import get_shift_context
 
 
-def get_opposite_side(message):
-    """
-    Returns opposite side of message owner
-    """
-    if message.owner.is_resident:
-        return message.application.shift.owner
-    else:
-        return message.application.owner
+def create_message(application, owner, text):
+    from apps.shifts.models import Message
+
+    if text:
+        message = Message.objects.create(
+            application=application, owner=owner, text=text)
+        process_message_creation(message, notify=False)
+
+        return message
+
+    return None
 
 
 def process_message_creation(message, notify=True):
+    from .application import get_application_context, get_opposite_side
+
     if notify:
         notify_message_created(message)
 
-        destination = get_opposite_side(message)
+        destination = get_opposite_side(message.application, message.owner)
 
         mail_notification_enabled = destination.is_scheduler or (
             destination.is_resident and

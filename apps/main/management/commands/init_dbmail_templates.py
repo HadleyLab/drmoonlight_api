@@ -248,7 +248,6 @@ class Command(BaseCommand):
             }
         )
 
-
         # Destination: resident
         MailTemplate.objects.update_or_create(
             slug='invitiation_created',
@@ -273,6 +272,255 @@ class Command(BaseCommand):
                 <p>
                     <a href="{{ protocol }}://{{ domain }}/#/scheduler/messages/{{ shift.pk }}/discuss/{{ application.pk }}/">
                         Review application
+                    </a>
+                </p>               
+                """,
+                'base': base_template,
+            }
+        )
+
+        # Destination: resident
+        MailTemplate.objects.update_or_create(
+            slug='application_approved',
+            defaults={
+                'name': 'Application approved',
+                'subject': 'Your application was approved',
+                'message': """
+                <p>
+                    Hello {{ resident.full_name }}!
+                </p>
+                <p></p>
+                <p>
+                    Your application was approved! Please confirm your participation. <br />
+                    {{ text }} 
+                </p>
+                
+                <p>
+                    <b>Shift details:</b>
+                </p>
+                <p>
+                    <b>Location:</b> {{ shift.facility_name }} at {{ shift.department_name }}<br />
+                    <b>Starts:</b> {{ shift.date_start }} <br />
+                    <b>Ends:</b> {{ shift.date_end }} <br />
+                    <b>Payment amount:</b> {{ shift.payment_amount }} {% if shift.payment_per_hour %}per hour{% endif %}<br />
+                    {{ shift.description }}
+                </p>
+                <p>
+                    <a href="{{ protocol }}://{{ domain }}/#/resident/messages/{{ shift.pk }}/discuss/{{ application.pk }}/">
+                        Open dialog
+                    </a>
+                </p>               
+                """,
+                'base': base_template,
+            }
+        )
+
+        # Destination: resident
+        MailTemplate.objects.update_or_create(
+            slug='application_rejected',
+            defaults={
+                'name': 'Application rejected',
+                'subject': 'Your application was rejected',
+                'message': """
+                <p>
+                    Hello {{ resident.full_name }}!
+                </p>
+                <p></p>
+                <p>
+                    Your application was rejected. <br />
+                    {{ text }} 
+                </p>
+                
+                <p>
+                    <b>Shift details:</b>
+                </p>
+                <p>
+                    <b>Location:</b> {{ shift.facility_name }} at {{ shift.department_name }}<br />
+                    <b>Starts:</b> {{ shift.date_start }} <br />
+                    <b>Ends:</b> {{ shift.date_end }} <br />
+                    <b>Payment amount:</b> {{ shift.payment_amount }} {% if shift.payment_per_hour %}per hour{% endif %}<br />
+                    {{ shift.description }}
+                </p>
+                <p>
+                    <a href="{{ protocol }}://{{ domain }}/#/resident/messages/{{ shift.pk }}/discuss/{{ application.pk }}/">
+                        Open dialog
+                    </a>
+                </p>               
+                """,
+                'base': base_template,
+            }
+        )
+
+        # Destination: resident
+        MailTemplate.objects.update_or_create(
+            slug='application_postponed',
+            defaults={
+                'name': 'Application postponed',
+                'subject': 'Your application was postponed',
+                'message': """
+                <p>
+                    Hello {{ resident.full_name }}!
+                </p>
+                <p></p>
+                <p>
+                    Your application was postponed because an another application was approved.
+                </p>
+                
+                <p>
+                    <b>Shift details:</b>
+                </p>
+                <p>
+                    <b>Location:</b> {{ shift.facility_name }} at {{ shift.department_name }}<br />
+                    <b>Starts:</b> {{ shift.date_start }} <br />
+                    <b>Ends:</b> {{ shift.date_end }} <br />
+                    <b>Payment amount:</b> {{ shift.payment_amount }} {% if shift.payment_per_hour %}per hour{% endif %}<br />
+                    {{ shift.description }}
+                </p>
+                <p>
+                    <a href="{{ protocol }}://{{ domain }}/#/resident/messages/{{ shift.pk }}/discuss/{{ application.pk }}/">
+                        Open dialog
+                    </a>
+                </p>               
+                """,
+                'base': base_template,
+            }
+        )
+
+        # Destination: resident
+        MailTemplate.objects.update_or_create(
+            slug='application_renewed',
+            defaults={
+                'name': 'Application renewed',
+                'subject': 'Your application was renewed',
+                'message': """
+                <p>
+                    Hello {{ resident.full_name }}!
+                </p>
+                <p></p>
+                <p>
+                    Your application was renewed because an another application was cancelled.
+                </p>
+                
+                <p>
+                    <b>Shift details:</b>
+                </p>
+                <p>
+                    <b>Location:</b> {{ shift.facility_name }} at {{ shift.department_name }}<br />
+                    <b>Starts:</b> {{ shift.date_start }} <br />
+                    <b>Ends:</b> {{ shift.date_end }} <br />
+                    <b>Payment amount:</b> {{ shift.payment_amount }} {% if shift.payment_per_hour %}per hour{% endif %}<br />
+                    {{ shift.description }}
+                </p>
+                <p>
+                    <a href="{{ protocol }}://{{ domain }}/#/resident/messages/{{ shift.pk }}/discuss/{{ application.pk }}/">
+                        Open dialog
+                    </a>
+                </p>               
+                """,
+                'base': base_template,
+            }
+        )
+
+        # Destination: resident
+        MailTemplate.objects.update_or_create(
+            slug='application_completed',
+            defaults={
+                'name': 'Application completed',
+                'subject': 'Your application was completed',
+                'message': """
+                <p>
+                    Hello {{ resident.full_name }}!
+                </p>
+                <p></p>
+                <p>
+                    Your application was completed.<br />
+                    {{ text }}
+                </p>
+                
+                <p>
+                    <b>Shift details:</b>
+                </p>
+                <p>
+                    <b>Location:</b> {{ shift.facility_name }} at {{ shift.department_name }}<br />
+                    <b>Starts:</b> {{ shift.date_start }} <br />
+                    <b>Ends:</b> {{ shift.date_end }} <br />
+                    <b>Payment amount:</b> {{ shift.payment_amount }} {% if shift.payment_per_hour %}per hour{% endif %}<br />
+                    {{ shift.description }}
+                </p>
+                <p>
+                    <a href="{{ protocol }}://{{ domain }}/#/resident/messages/{{ shift.pk }}/discuss/{{ application.pk }}/">
+                        Open dialog
+                    </a>
+                </p>               
+                """,
+                'base': base_template,
+            }
+        )
+
+        # Destination: scheduler
+        MailTemplate.objects.update_or_create(
+            slug='application_confirmed',
+            defaults={
+                'name': 'Application confirmed',
+                'subject': 'The resident {{ resident.full_name }} confirmed the application',
+                'message': """
+                <p>
+                    Hello {{ scheduler.full_name }}!
+                </p>
+                <p></p>
+                <p>
+                    {{ resident.full_name }} confirmed the application.<br />
+                    {{ text }}
+                </p>
+                
+                <p>
+                    <b>Shift details:</b>
+                </p>
+                <p>
+                    <b>Location:</b> {{ shift.facility_name }} at {{ shift.department_name }}<br />
+                    <b>Starts:</b> {{ shift.date_start }} <br />
+                    <b>Ends:</b> {{ shift.date_end }} <br />
+                    <b>Payment amount:</b> {{ shift.payment_amount }} {% if shift.payment_per_hour %}per hour{% endif %}<br />
+                    {{ shift.description }}
+                </p>
+                <p>
+                    <a href="{{ protocol }}://{{ domain }}/#/resident/messages/{{ shift.pk }}/discuss/{{ application.pk }}/">
+                        Open dialog
+                    </a>
+                </p>               
+                """,
+                'base': base_template,
+            }
+        )
+
+        # Destination: resident or scheduler
+        MailTemplate.objects.update_or_create(
+            slug='application_cancelled',
+            defaults={
+                'name': 'Application cancelled',
+                'subject': 'Application cancelled',
+                'message': """
+                <p>
+                    Hello {{ destination.full_name }}!
+                </p>
+                <p></p>
+                <p>
+                    The application was cancelled.<br />
+                    {{ text }}
+                </p>
+                <p>
+                    <b>Shift details:</b>
+                </p>
+                <p>
+                    <b>Location:</b> {{ shift.facility_name }} at {{ shift.department_name }}<br />
+                    <b>Starts:</b> {{ shift.date_start }} <br />
+                    <b>Ends:</b> {{ shift.date_end }} <br />
+                    <b>Payment amount:</b> {{ shift.payment_amount }} {% if shift.payment_per_hour %}per hour{% endif %}<br />
+                    {{ shift.description }}
+                </p>
+                <p>
+                    <a href="{{ protocol }}://{{ domain }}/#/{{ destination.role }}/messages/{{ shift.pk }}/discuss/{{ application.pk }}/">
+                        Open dialog
                     </a>
                 </p>               
                 """,

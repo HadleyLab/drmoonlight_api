@@ -1,5 +1,3 @@
-from django.forms import model_to_dict
-
 from apps.accounts.models import Resident
 from apps.accounts.services.user import get_user_context
 from apps.main.utils import async_send_mail
@@ -23,15 +21,27 @@ def get_shift_context(shift):
     }
 
 
+def get_context(shift, resident, **kwargs):
+    context = {
+        'resident': get_user_context(resident),
+        'shift': get_shift_context(shift),
+    }
+
+    context.update(kwargs)
+
+    return context
+
+
 def process_shift_creation(shift):
     suitable_residents = Resident.objects.filter_for_shift(shift) \
         .filter(notification_new_shifts=True)
 
     for resident in suitable_residents:
-        async_send_mail('shift_created', resident.email, {
-            'resident': get_user_context(resident),
-            'shift': get_shift_context(shift),
-        })
+        async_send_mail(
+            'shift_created',
+            resident.email,
+            get_context(shift, resident)
+        )
 
 
 def process_shift_updating(shift):
@@ -46,11 +56,11 @@ def process_shift_updating(shift):
         is_applicant = False
 
     for resident in suitable_residents:
-        async_send_mail('shift_updated', resident.email, {
-            'resident': get_user_context(resident),
-            'shift': get_shift_context(shift),
-            'is_applicant': is_applicant,
-        })
+        async_send_mail(
+            'shift_updated',
+            resident.email,
+            get_context(shift, resident, is_applicant=is_applicant)
+        )
 
 
 def process_shift_deletion(shift):
@@ -58,7 +68,8 @@ def process_shift_deletion(shift):
 
     if active_applications.exists():
         for resident in active_applications.all():
-            async_send_mail('shift_deleted', resident.email, {
-                'resident': get_user_context(resident),
-                'shift': get_shift_context(shift),
-            })
+            async_send_mail(
+                'shift_deleted',
+                resident.email,
+                get_context(shift, resident)
+            )
