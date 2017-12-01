@@ -83,7 +83,8 @@ class InvitationCreateSerializer(BaseApplicationCreateSerializer):
         assert user.is_scheduler, \
             'InvitationCreateSerializer only for a scheduler'
 
-        # TODO: can the scheduler invite an unsuitable resident?
+        # TODO: think about an adding a restriction for inviting
+        # TODO: an unsuitable resident
         if shift.owner != user.scheduler:
             raise ValidationError(
                 'You can not create an application for not own shift')

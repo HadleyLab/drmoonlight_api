@@ -264,7 +264,7 @@ class Application(TimestampModelMixin, models.Model):
                 source=ApplicationStateEnum.CONFIRMED,
                 target=ApplicationStateEnum.COMPLETED,
                 permission=can_scheduler_change_application,
-                # TODO: check that now() >= shift.date_end in can_proceed
+                conditions=[lambda application: application.shift.is_ended]
     )
     def complete(self, data):
         """

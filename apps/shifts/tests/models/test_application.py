@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.test import TestCase, mock
 from django.utils import timezone
-from django_fsm import has_transition_perm
+from django_fsm import has_transition_perm, can_proceed
 
 from apps.accounts.factories import ResidentFactory, SchedulerFactory
 from apps.shifts.factories import ApplicationFactory, ShiftFactory, \
@@ -347,7 +347,11 @@ class ApplicationTest(TestCase):
     @mock.patch(
         'apps.shifts.models.application.process_completing', autospec=True)
     def test_complete(self, mock_process_completing):
+        self.shift.date_start = timezone.now() - timedelta(hours=2)
+        self.shift.date_end = timezone.now() - timedelta(hours=1)
+        self.shift.save()
         application = ApplicationFactory.create(
+            shift=self.shift,
             state=ApplicationStateEnum.CONFIRMED)
 
         data = self.get_transition_data()
@@ -362,6 +366,9 @@ class ApplicationTest(TestCase):
             application, data['user'], data['text'])
 
     def test_complete_permissions(self):
+        self.shift.date_start = timezone.now() - timedelta(hours=2)
+        self.shift.date_end = timezone.now() - timedelta(hours=1)
+        self.shift.save()
         application = ApplicationFactory.create(
             owner=self.resident, shift=self.shift,
             state=ApplicationStateEnum.CONFIRMED)
@@ -373,6 +380,24 @@ class ApplicationTest(TestCase):
         # Scheduler can complete confirmed applications
         self.assertTrue(has_transition_perm(
             application.complete, self.scheduler.user_ptr))
+
+    def test_complete_not_ended_shift_failed(self):
+        application = ApplicationFactory.create(
+            owner=self.resident, shift=self.shift,
+            state=ApplicationStateEnum.CONFIRMED)
+
+        self.assertFalse(can_proceed(application.complete))
+
+    def test_complete_ended_shift_success(self):
+        self.shift.date_start = timezone.now() - timedelta(hours=2)
+        self.shift.date_end = timezone.now() - timedelta(hours=1)
+        self.shift.save()
+        application = ApplicationFactory.create(
+            owner=self.resident,
+            shift=self.shift,
+            state=ApplicationStateEnum.CONFIRMED)
+
+        self.assertTrue(can_proceed(application.complete))
 
     def test_last_message_when_do_not_have_messages_is_none(self):
         application = ApplicationFactory.create()

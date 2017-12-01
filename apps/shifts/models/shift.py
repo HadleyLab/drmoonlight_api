@@ -17,6 +17,12 @@ class ShiftStateEnum(object):
 
 class ShiftQuerySet(models.QuerySet):
     def filter_for_resident(self, resident):
+        # TODO: refactor. This method shouldn't return all shifts for
+        # TODO: not approved resident
+        """
+        Returns suitable shifts for the approved resident and all for
+        not-approved
+        """
         if resident.is_approved:
             # An approved resident can see only suitable shifts for him
             return self.filter(
@@ -104,10 +110,6 @@ class Shift(TimestampModelMixin, models.Model):
         from .application import ApplicationStateEnum
 
         if self.is_ended:
-            # TODO: think about checking applications in the COMPLETED state
-            # TODO: may be failed applications shouldn't make a shift completed
-            # TODO: but now I think, there is no reasons not to consider
-            # TODO: the ended shift as completed
             return ShiftStateEnum.COMPLETED
 
         applications_count = self.applications.aggregate_count_by_state()
@@ -126,10 +128,3 @@ class Shift(TimestampModelMixin, models.Model):
     @property
     def is_coverage_completed(self):
         return self.state == ShiftStateEnum.COVERAGE_COMPLETED
-
-    @property
-    def has_active_applications(self):
-        return self.state in [
-            ShiftStateEnum.COVERAGE_COMPLETED,
-            ShiftStateEnum.REQUIRE_APPROVAL,
-        ]
