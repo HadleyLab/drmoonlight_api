@@ -31,6 +31,16 @@ class ResidentViewSetTestCase(APITestCase):
         self.assertEqual(resident.last_name, data['last_name'])
         self.assertTrue(resident.check_password(data['password']))
 
+    def test_create_without_first_and_last_name_failed(self):
+        data = {
+            'email': 'resident@gmail.com',
+            'password': 'Str0ngPassW0RD',
+            'first_name': '',
+            'last_name': '',
+        }
+        resp = self.client.post('/api/accounts/resident/', data)
+        self.assertBadRequest(resp)
+
     def test_retrieve_by_unauthenticated_failed(self):
         resp = self.client.get('/api/accounts/resident/{0}/'.format(
             self.resident.pk))

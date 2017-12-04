@@ -3,7 +3,7 @@ from django_fsm import FSMIntegerField, transition
 
 from apps.accounts.services.resident import process_resident_approving, \
     process_resident_rejecting, process_resident_profile_filling
-from .user import User
+from .user import User, UserManager
 from .speciality import Speciality
 from .residency_program import ResidencyProgram
 
@@ -116,6 +116,11 @@ class ResidentQuerySet(models.QuerySet):
         )
 
 
+class ResidentManager(models.Manager.from_queryset(ResidentQuerySet),
+                      UserManager):
+    pass
+
+
 class Resident(ResidentNotificationSettingsMixin,
                ResidentProfileSettingsMixin, User):
     specialities = models.ManyToManyField(
@@ -138,7 +143,7 @@ class Resident(ResidentNotificationSettingsMixin,
         choices=ResidentStateEnum.CHOICES
     )
 
-    objects = ResidentQuerySet.as_manager()
+    objects = ResidentManager()
 
     class Meta:
         verbose_name = 'Resident'

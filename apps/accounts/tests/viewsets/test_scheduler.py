@@ -34,6 +34,18 @@ class SchedulerViewSetTestCase(APITestCase):
         self.assertEqual(scheduler.facility_name, data['facility_name'])
         self.assertTrue(scheduler.check_password(data['password']))
 
+    def test_create_without_first_and_last_name_failed(self):
+        data = {
+            'email': 'scheduler@gmail.com',
+            'password': 'Str0ngPassW0RD',
+            'department_name': 'Department',
+            'facility_name': 'Facility',
+            'first_name': '',
+            'last_name': '',
+        }
+        resp = self.client.post('/api/accounts/scheduler/', data)
+        self.assertBadRequest(resp)
+
     def test_retrieve_by_unauthenticated_failed(self):
         resp = self.client.get('/api/accounts/scheduler/{0}/'.format(
             self.scheduler.pk))
