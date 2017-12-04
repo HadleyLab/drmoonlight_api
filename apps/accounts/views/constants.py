@@ -2,7 +2,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
-from apps.accounts.models import ResidencyProgram, Speciality
+from apps.accounts.models import (
+    ResidencyProgram, Speciality, US_STATES, TIMEZONES)
 
 
 @api_view()
@@ -15,4 +16,10 @@ def constants(request):
         {
             'residency_program': list(residency_program),
             'speciality': list(speciality),
+            'us_states': [
+                {'pk': key, 'name': value} for key, value in US_STATES
+            ],
+            'timezones': [
+                {'pk': key, 'name': value} for key, value in TIMEZONES
+            ],
         })

@@ -110,7 +110,51 @@ class ResidentViewSetTestCase(APITestCase):
             data['residency_program'])
         self.assertEqual(self.resident.residency_years, data['residency_years'])
 
-    def test_update_using_existing_another_email_by_resident_failed(self):
+    def test_update_without_state_license_without_states_success(self):
+        self.authenticate_as_resident()
+        data = {
+            'specialities': [SpecialityFactory.create().pk, ],
+            'residency_program': ResidencyProgramFactory.create().pk,
+            'residency_years': 2017,
+            'state_license': False,
+            'state_license_states': [],
+        }
+        resp = self.client.patch('/api/accounts/resident/{0}/'.format(
+            self.resident.pk), data, format='json')
+        self.assertSuccessResponse(resp)
+
+    def test_update_with_state_license_without_states_failed(self):
+        self.authenticate_as_resident()
+        data = {
+            'specialities': [SpecialityFactory.create().pk, ],
+            'residency_program': ResidencyProgramFactory.create().pk,
+            'residency_years': 2017,
+            'state_license': True,
+            'state_license_states': [],
+        }
+        resp = self.client.patch('/api/accounts/resident/{0}/'.format(
+            self.resident.pk), data, format='json')
+        self.assertBadRequest(resp)
+        self.assertEqual(
+            resp.data['state_license_states'],
+            ['You must choose at least one state where you have state licence'])
+
+    def test_update_with_state_license_with_states_success(self):
+        self.authenticate_as_resident()
+        data = {
+            'specialities': [SpecialityFactory.create().pk, ],
+            'residency_program': ResidencyProgramFactory.create().pk,
+            'residency_years': 2017,
+            'state_license': True,
+            'state_license_states': ['AL', 'AK'],
+        }
+        resp = self.client.patch('/api/accounts/resident/{0}/'.format(
+            self.resident.pk), data, format='json')
+        self.assertSuccessResponse(resp)
+        self.resident.refresh_from_db()
+        self.assertEqual(self.resident.state_license_states, ['AL', 'AK'])
+
+    def test_update_using_existing_another_email_failed(self):
         ResidentFactory.create(email='another@gmail.com')
 
         self.authenticate_as_resident()

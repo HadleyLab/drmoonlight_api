@@ -6,3 +6,4 @@ from .superuser import SuperUser
 
 from .speciality import Speciality
 from .residency_program import ResidencyProgram
+from .choices import US_STATES, TIMEZONES

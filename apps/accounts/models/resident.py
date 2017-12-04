@@ -1,8 +1,10 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django_fsm import FSMIntegerField, transition
 
 from apps.accounts.services.resident import process_resident_approving, \
     process_resident_rejecting, process_resident_profile_filling
+from .choices import US_STATES
 from .user import User, UserManager
 from .speciality import Speciality
 from .residency_program import ResidencyProgram
@@ -21,10 +23,10 @@ class ResidentProfileSettingsMixin(models.Model):
         verbose_name='Has state licence',
         default=False
     )
-    state_license_state = models.CharField(
-        verbose_name='State licence\'s state',
-        max_length=255,
-        blank=True
+    state_license_states = ArrayField(
+        models.CharField(max_length=2, choices=US_STATES),
+        verbose_name='State licence\'s states',
+        blank=True, null=True
     )
     federal_dea_active = models.BooleanField(
         verbose_name='Is federal dea active',
