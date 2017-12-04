@@ -22,7 +22,9 @@ class ShiftViewSet(BulkCreateModelMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         qs = super(ShiftViewSet, self).get_queryset()
 
-        return qs.select_related('owner').filter_for_user(self.request.user)
+        return qs.select_related('owner') \
+            .prefetch_related('applications') \
+            .filter_for_user(self.request.user)
 
     @transaction.atomic
     def perform_create(self, serializer):
