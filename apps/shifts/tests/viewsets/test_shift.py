@@ -1,3 +1,7 @@
+from datetime import timedelta
+
+from django.utils import timezone
+
 from apps.main.tests import APITestCase
 from apps.shifts.models import Shift
 from apps.shifts.tests.mixins import ShiftsTestCaseMixin
@@ -70,9 +74,12 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         self.assertEqual(len(data), 0)
 
     def get_shift_data(self, **kwargs):
+        future_date_start = timezone.now() + timedelta(days=1)
+        future_date_end = timezone.now() + timedelta(days=2)
+
         data = {
-            'date_start': '2017-11-10T10:00Z',
-            'date_end': '2017-11-10T18:00Z',
+            'date_start': future_date_start.strftime('%Y-%m-%dT%H:%MZ'),
+            'date_end': future_date_end.strftime('%Y-%m-%dT%H:%MZ'),
             'residency_program': self.residency_program.pk,
             'residency_years_required': 0,
             'speciality': self.first_speciality.pk,
@@ -102,6 +109,33 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         data = self.get_shift_data()
         resp = self.client.post('/api/shifts/shift/', data, format='json')
         self.assertForbidden(resp)
+
+    def test_create_with_past_dates_by_scheduler_failed(self):
+        self.authenticate_as_scheduler()
+
+        data = self.get_shift_data(
+            date_start='2010-11-10T10:00Z',
+            date_end='2010-11-11T10:00Z')
+        resp = self.client.post('/api/shifts/shift/', data, format='json')
+        self.assertBadRequest(resp)
+        self.assertEqual(
+            resp.data['date_start'],
+            ['The starting date must occur after the current date'])
+
+    def test_create_with_wrong_dates_by_scheduler_failed(self):
+        self.authenticate_as_scheduler()
+
+        future_date = (timezone.now() + timedelta(days=1)) \
+            .strftime('%Y-%m-%dT%H:%MZ')
+
+        data = self.get_shift_data(
+            date_start=future_date,
+            date_end=future_date)
+        resp = self.client.post('/api/shifts/shift/', data, format='json')
+        self.assertBadRequest(resp)
+        self.assertEqual(
+            resp.data['date_end'],
+            ['The ending date must occur after the starting date'])
 
     def test_create_by_scheduler_success(self):
         self.authenticate_as_scheduler()
