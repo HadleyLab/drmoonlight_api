@@ -186,8 +186,12 @@ REST_FRAMEWORK = {
 }
 
 DOMAIN = os.environ.get('DOMAIN', 'localhost:3000')
-PROTOCOL = 'http'
-SITE_NAME = 'Dr. Moonlight'
+if os.environ.get('HTTPS', 'False') == 'True':
+    PROTOCOL = 'https'  # pragma: no cover
+else:
+    PROTOCOL = 'http'  # pragma: no cover
+
+SITE_NAME = os.environ.get('SITE_NAME', 'Dr. Moonlight')
 SITE_ID = 1
 
 DJOSER = {
