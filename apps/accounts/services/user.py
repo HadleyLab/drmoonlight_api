@@ -1,3 +1,7 @@
+from contextlib import contextmanager
+
+import pytz
+from django.utils import timezone
 from djoser import email
 
 
@@ -16,6 +20,17 @@ def get_user_context(user):
 
 
 def process_user_creation(user):
-    context = {'user': user}
-    to = [user.email]
-    email.ActivationEmail(context=context).send(to)
+    with localize_for_user(user):
+        email.ActivationEmail(context={'user': user}).send([user.email])
+
+
+@contextmanager
+def localize_for_user(user):
+    """
+    Context manager which should be used to localize output for
+    the concrete `user`.
+    Actually it just changes local timezone to user's timezone
+    """
+    timezone.activate(pytz.timezone(user.timezone))
+    yield
+    timezone.deactivate()

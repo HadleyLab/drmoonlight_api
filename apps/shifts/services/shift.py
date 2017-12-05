@@ -1,13 +1,15 @@
+from django.utils.timezone import localtime
+
 from apps.accounts.models import Resident
-from apps.accounts.services.user import get_user_context
+from apps.accounts.services.user import get_user_context, localize_for_user
 from apps.main.utils import async_send_mail
 
 
 def get_shift_context(shift):
     return {
         'pk': shift.pk,
-        'date_start': shift.date_start.strftime('%Y-%m-%d %H:%M'),
-        'date_end': shift.date_end.strftime('%Y-%m-%d %H:%M'),
+        'date_start': localtime(shift.date_start).strftime('%Y-%m-%d %H:%M'),
+        'date_end': localtime(shift.date_end).strftime('%Y-%m-%d %H:%M'),
         'facility_name': shift.owner.facility_name,
         'department_name': shift.owner.department_name,
         'speciality_name': shift.speciality.name,
@@ -37,11 +39,12 @@ def process_shift_creation(shift):
         .filter(notification_new_shifts=True)
 
     for resident in suitable_residents:
-        async_send_mail(
-            'shift_created',
-            resident.email,
-            get_context(shift, resident)
-        )
+        with localize_for_user(resident):
+            async_send_mail(
+                'shift_created',
+                resident.email,
+                get_context(shift, resident)
+            )
 
 
 def process_shift_updating(shift):
@@ -56,11 +59,12 @@ def process_shift_updating(shift):
         is_applicant = False
 
     for resident in suitable_residents:
-        async_send_mail(
-            'shift_updated',
-            resident.email,
-            get_context(shift, resident, is_applicant=is_applicant)
-        )
+        with localize_for_user(resident):
+            async_send_mail(
+                'shift_updated',
+                resident.email,
+                get_context(shift, resident, is_applicant=is_applicant)
+            )
 
 
 def process_shift_deletion(shift):
@@ -68,8 +72,9 @@ def process_shift_deletion(shift):
 
     if active_applications.exists():
         for resident in active_applications.all():
-            async_send_mail(
-                'shift_deleted',
-                resident.email,
-                get_context(shift, resident)
-            )
+            with localize_for_user(resident):
+                async_send_mail(
+                    'shift_deleted',
+                    resident.email,
+                    get_context(shift, resident)
+                )

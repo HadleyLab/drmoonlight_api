@@ -1,4 +1,4 @@
-from apps.accounts.services.user import get_user_context
+from apps.accounts.services.user import get_user_context, localize_for_user
 from apps.main.utils import async_send_mail
 from apps.shifts.notifications import notify_message_created
 from .shift import get_shift_context
@@ -31,14 +31,16 @@ def process_message_creation(message, notify=True):
         )
 
         if mail_notification_enabled:
-            async_send_mail(
-                'message_created',
-                destination.email,
-                {
-                    'source': get_user_context(message.owner),
-                    'destination': get_user_context(destination),
-                    'text': message.text,
-                    'application': get_application_context(message.application),
-                    'shift': get_shift_context(message.application.shift),
-                }
-            )
+            with localize_for_user(destination):
+                async_send_mail(
+                    'message_created',
+                    destination.email,
+                    {
+                        'source': get_user_context(message.owner),
+                        'destination': get_user_context(destination),
+                        'text': message.text,
+                        'application': get_application_context(
+                            message.application),
+                        'shift': get_shift_context(message.application.shift),
+                    }
+                )
