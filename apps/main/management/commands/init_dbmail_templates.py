@@ -250,7 +250,7 @@ class Command(BaseCommand):
 
         # Destination: resident
         MailTemplate.objects.update_or_create(
-            slug='invitiation_created',
+            slug='invitation_created',
             defaults={
                 'name': 'Invitation created',
                 'subject': 'You are invited to the shift',

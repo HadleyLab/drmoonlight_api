@@ -85,7 +85,7 @@ def process_postponing(application):
     message = create_message(
         application,
         application.shift.owner,
-        "You application was postponed due to accepting an another application"
+        'You application was postponed due to accepting an another application'
     )
     notify_application_state_changed(application, message)
 
@@ -102,7 +102,7 @@ def process_renewing(application):
     message = create_message(
         application,
         application.shift.owner,
-        "The shift became available and your application was renewed"
+        'The shift became available and your application was renewed'
     )
     notify_application_state_changed(application, message)
 
@@ -131,10 +131,7 @@ def process_cancelling(application, user, text):
     message = create_message(application, user, text)
     notify_application_state_changed(application, message)
 
-    if user.is_resident:
-        destination = application.shift.owner
-    else:
-        destination = application.owner
+    destination = get_opposite_side(application, user)
 
     mail_notification_enabled = destination.is_scheduler or (
             destination.is_resident and

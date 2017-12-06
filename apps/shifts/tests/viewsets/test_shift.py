@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.test import mock
 from django.utils import timezone
 
 from apps.main.tests import APITestCase
@@ -137,7 +138,9 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
             resp.data['date_end'],
             ['The ending date must occur after the starting date'])
 
-    def test_create_by_scheduler_success(self):
+    @mock.patch(
+        'apps.shifts.viewsets.shift.process_shift_creation', autospec=True)
+    def test_create_by_scheduler_success(self, mock_process_shift_creation):
         self.authenticate_as_scheduler()
 
         data = self.get_shift_data()
@@ -155,6 +158,7 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         self.assertEqual(shift.speciality.pk, data['speciality'])
         self.assertEqual(shift.payment_amount, data['payment_amount'])
         self.assertEqual(shift.payment_per_hour, data['payment_per_hour'])
+        mock_process_shift_creation.assert_called_with(shift)
 
     def test_bulk_create_by_scheduler_success(self):
         """
@@ -206,7 +210,9 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
             data, format='json')
         self.assertNotFound(resp)
 
-    def test_update_by_scheduler_success(self):
+    @mock.patch(
+        'apps.shifts.viewsets.shift.process_shift_updating', autospec=True)
+    def test_update_by_scheduler_success(self, mock_process_shift_updating):
         self.authenticate_as_scheduler()
 
         data = self.get_shift_data()
@@ -214,6 +220,8 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
             '/api/shifts/shift/{0}/'.format(self.first_shift.pk),
             data, format='json')
         self.assertSuccessResponse(resp)
+
+        mock_process_shift_updating.assert_called_with(self.first_shift)
 
     def test_get_by_unauthenticated_failed(self):
         resp = self.client.get(
@@ -298,7 +306,9 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
             '/api/shifts/shift/{0}/'.format(self.second_shift.pk))
         self.assertNotFound(resp)
 
-    def test_delete_by_scheduler_success(self):
+    @mock.patch(
+        'apps.shifts.viewsets.shift.process_shift_deletion', autospec=True)
+    def test_delete_by_scheduler_success(self, mock_process_shift_deletion):
         self.authenticate_as_scheduler()
 
         resp = self.client.delete(
@@ -306,3 +316,4 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         self.assertSuccessResponse(resp)
 
         self.assertFalse(Shift.objects.filter(pk=self.first_shift.pk).exists())
+        self.assertTrue(mock_process_shift_deletion.called)

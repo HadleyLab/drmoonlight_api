@@ -102,7 +102,9 @@ class ApplicationTest(TestCase):
 
     @mock.patch(
         'apps.shifts.models.application.process_approving', autospec=True)
-    def test_approve(self, mock_process_approving):
+    @mock.patch(
+        'apps.shifts.models.application.process_postponing', autospec=True)
+    def test_approve(self, mock_process_postponing, mock_process_approving):
         # New applications
         first_application = ApplicationFactory.create(shift=self.shift)
         second_application = ApplicationFactory.create(shift=self.shift)
@@ -136,6 +138,7 @@ class ApplicationTest(TestCase):
 
         mock_process_approving.assert_called_with(
             first_application, data['user'], data['text'])
+        mock_process_postponing.assert_called_with(second_application)
 
     def test_approve_permissions(self):
         application = ApplicationFactory.create(
@@ -212,7 +215,10 @@ class ApplicationTest(TestCase):
 
     @mock.patch(
         'apps.shifts.models.application.process_cancelling', autospec=True)
-    def test_cancel_approved_not_started(self, mock_process_cancelling):
+    @mock.patch(
+        'apps.shifts.models.application.process_renewing', autospec=True)
+    def test_cancel_approved_not_started(
+            self, mock_process_renewing, mock_process_cancelling):
         """
         Checks that cancelling an application for the not started shift
         makes the application cancelled and renews all postponed applications
@@ -250,10 +256,14 @@ class ApplicationTest(TestCase):
 
         mock_process_cancelling.assert_called_with(
             application, data['user'], data['text'])
+        mock_process_renewing.assert_called_with(postponed_application)
 
     @mock.patch(
         'apps.shifts.models.application.process_cancelling', autospec=True)
-    def test_cancel_confirmed_not_started(self, mock_process_cancelling):
+    @mock.patch(
+        'apps.shifts.models.application.process_renewing', autospec=True)
+    def test_cancel_confirmed_not_started(
+            self, mock_process_renewing, mock_process_cancelling):
         """
         Checks that cancelling an application for the not started shift
         makes the application failed and renews all postponed applications
@@ -283,10 +293,14 @@ class ApplicationTest(TestCase):
 
         mock_process_cancelling.assert_called_with(
             application, data['user'], data['text'])
+        mock_process_renewing.assert_called_with(postponed_application)
 
     @mock.patch(
         'apps.shifts.models.application.process_cancelling', autospec=True)
-    def test_cancel_started(self, mock_process_cancelling):
+    @mock.patch(
+        'apps.shifts.models.application.process_renewing', autospec=True)
+    def test_cancel_started(
+            self, mock_process_renewing, mock_process_cancelling):
         """
         Checks that cancelling an application for the started shift
         makes the application failed and doesn't renew all postponed
@@ -318,6 +332,7 @@ class ApplicationTest(TestCase):
 
         mock_process_cancelling.assert_called_with(
             application, data['user'], data['text'])
+        self.assertFalse(mock_process_renewing.called)
 
     def test_cancel_permissions(self):
         application = ApplicationFactory.create(
