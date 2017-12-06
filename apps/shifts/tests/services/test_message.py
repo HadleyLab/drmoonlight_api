@@ -37,12 +37,7 @@ class MessageServiceTestCase(TestCase):
 
         mock_notify_message_created.assert_not_called()
 
-    def test_create_message_without_text_does_not_create_message(self):
-        message = create_message(self.application, self.resident, '')
-
-        self.assertIsNone(message)
-
-    def test_create_message_with_text_creates_message(self):
+    def test_create_message_works_correctly(self):
         message = create_message(self.application, self.resident, 'Comment')
 
         self.assertIsNotNone(message)

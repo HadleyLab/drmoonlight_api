@@ -7,14 +7,11 @@ from .shift import get_shift_context
 def create_message(application, owner, text):
     from apps.shifts.models import Message
 
-    if text:
-        message = Message.objects.create(
-            application=application, owner=owner, text=text)
-        process_message_creation(message, notify=False)
+    message = Message.objects.create(
+        application=application, owner=owner, text=text)
+    process_message_creation(message, notify=False)
 
-        return message
-
-    return None
+    return message
 
 
 def process_message_creation(message, notify=True):

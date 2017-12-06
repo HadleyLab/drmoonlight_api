@@ -21,7 +21,7 @@ def get_application_context(application):
     }
 
 
-def get_context(application, message=None):
+def get_context(application, comment=None):
     context = {
         'scheduler': get_user_context(application.shift.owner),
         'resident': get_user_context(application.owner),
@@ -29,9 +29,9 @@ def get_context(application, message=None):
         'shift': get_shift_context(application.shift),
     }
 
-    if message:
+    if comment:
         context.update({
-            'text': message.text,
+            'comment': comment,
         })
 
     return context
@@ -55,39 +55,62 @@ def process_invitation(application):
         )
 
 
-def process_approving(application, user, text):
+def process_state_changing(
+        application, user, description, comment=''):
+    """
+    Creates new message for the application and notifies about state changing
+    """
+    if description and comment:
+        text = '\n'.join([comment, description])
+    else:
+        text = ''.join([comment, description])
+
     message = create_message(application, user, text)
+
     notify_application_state_changed(application, message)
+
+
+def process_approving(application, user, comment):
+    process_state_changing(
+        application,
+        user,
+        'The application is approved. Please, confirm that you will '
+        'work on the shift',
+        comment
+    )
 
     with localize_for_user(application.owner):
         if application.owner.notification_application_status_changing:
             async_send_mail(
                 'application_approved',
                 application.owner.email,
-                get_context(application, message)
+                get_context(application, comment)
             )
 
 
-def process_rejecting(application, user, text):
-    message = create_message(application, user, text)
-    notify_application_state_changed(application, message)
+def process_rejecting(application, user, comment):
+    process_state_changing(
+        application,
+        user,
+        'Your application is rejected. You may apply for other shifts '
+        'at any time',
+        comment)
 
     if application.owner.notification_application_status_changing:
         with localize_for_user(application.owner):
             async_send_mail(
                 'application_rejected',
                 application.owner.email,
-                get_context(application, message)
+                get_context(application)
             )
 
 
 def process_postponing(application):
-    message = create_message(
+    process_state_changing(
         application,
         application.shift.owner,
-        'You application was postponed due to accepting an another application'
+        'You application is postponed due to accepting an another application'
     )
-    notify_application_state_changed(application, message)
 
     if application.owner.notification_application_status_changing:
         with localize_for_user(application.owner):
@@ -99,12 +122,11 @@ def process_postponing(application):
 
 
 def process_renewing(application):
-    message = create_message(
+    process_state_changing(
         application,
         application.shift.owner,
-        'The shift became available and your application was renewed'
+        'The shift became available and your application is renewed'
     )
-    notify_application_state_changed(application, message)
 
     if application.owner.notification_application_status_changing:
         with localize_for_user(application.owner):
@@ -115,21 +137,27 @@ def process_renewing(application):
             )
 
 
-def process_confirming(application, user, text):
-    message = create_message(application, user, text)
-    notify_application_state_changed(application, message)
+def process_confirming(application, user, comment):
+    process_state_changing(
+        application,
+        user,
+        'The application is confirmed',
+        comment)
 
     with localize_for_user(application.shift.owner):
         async_send_mail(
             'application_confirmed',
             application.shift.owner.email,
-            get_context(application, message)
+            get_context(application, comment)
         )
 
 
-def process_cancelling(application, user, text):
-    message = create_message(application, user, text)
-    notify_application_state_changed(application, message)
+def process_cancelling(application, user, comment):
+    process_state_changing(
+        application,
+        user,
+        'The application is cancelled',
+        comment)
 
     destination = get_opposite_side(application, user)
 
@@ -146,21 +174,24 @@ def process_cancelling(application, user, text):
                 {
                     'source': get_user_context(user),
                     'destination': get_user_context(destination),
-                    'text': message.text if message else '',
+                    'comment': comment,
                     'application': get_application_context(application),
                     'shift': get_shift_context(application.shift),
                 }
             )
 
 
-def process_completing(application, user, text):
-    message = create_message(application, user, text)
-    notify_application_state_changed(application, message)
+def process_completing(application, user, comment):
+    process_state_changing(
+        application,
+        user,
+        'The application is completed',
+        comment)
 
     if application.owner.notification_application_status_changing:
         with localize_for_user(application.owner):
             async_send_mail(
                 'application_completed',
                 application.owner.email,
-                get_context(application, message)
+                get_context(application, comment)
             )

@@ -195,7 +195,7 @@ class Command(BaseCommand):
                 <p></p>
                 <p>
                     You received new message from {{ source.full_name }}:<br />
-                    {{ text }}
+                    {{ comment }}
                 </p>
                 <p>
                     <b>Shift details:</b>
@@ -292,7 +292,7 @@ class Command(BaseCommand):
                 <p></p>
                 <p>
                     Your application was approved! Please confirm your participation. <br />
-                    {{ text }} 
+                    {{ comment }} 
                 </p>
                 
                 <p>
@@ -328,7 +328,7 @@ class Command(BaseCommand):
                 <p></p>
                 <p>
                     Your application was rejected. <br />
-                    {{ text }} 
+                    {{ comment }} 
                 </p>
                 
                 <p>
@@ -434,7 +434,7 @@ class Command(BaseCommand):
                 <p></p>
                 <p>
                     Your application was completed.<br />
-                    {{ text }}
+                    {{ comment }}
                 </p>
                 
                 <p>
@@ -470,7 +470,7 @@ class Command(BaseCommand):
                 <p></p>
                 <p>
                     {{ resident.full_name }} confirmed the application.<br />
-                    {{ text }}
+                    {{ comment }}
                 </p>
                 
                 <p>
@@ -506,7 +506,7 @@ class Command(BaseCommand):
                 <p></p>
                 <p>
                     The application was cancelled.<br />
-                    {{ text }}
+                    {{ comment }}
                 </p>
                 <p>
                     <b>Shift details:</b>
