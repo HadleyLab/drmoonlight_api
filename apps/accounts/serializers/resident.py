@@ -13,7 +13,8 @@ class ResidentSerializer(serializers.ModelSerializer):
 class ResidentCreateSerializer(UserCreateSerializer):
     class Meta:
         model = Resident
-        fields = ('pk', 'email', 'first_name', 'last_name', 'password', )
+        fields = ('pk', 'email', 'first_name', 'last_name', 'password',
+                  'timezone', )
 
 
 class ResidentUpdateSerializer(serializers.ModelSerializer):
@@ -21,12 +22,12 @@ class ResidentUpdateSerializer(serializers.ModelSerializer):
         model = Resident
         fields = (
             # Required fields
-            'pk', 'email', 'first_name', 'last_name',  'residency_program',
-            'residency_years', 'specialities',
+            'pk', 'email', 'first_name', 'last_name', 'residency_program',
+            'residency_years', 'specialities', 'timezone',
 
             # Not required fields
             'earliest_availability_for_shift', 'preferences_for_work_location',
-            'state_license', 'state_license_state', 'federal_dea_active',
+            'state_license', 'state_license_states', 'federal_dea_active',
             'bls_acls_pals', 'active_permanent_residence_card_or_visa',
             'active_current_driver_license_or_passport', 'active_npi_number',
             'ecfmg', 'active_board_certificates',
@@ -42,6 +43,20 @@ class ResidentUpdateSerializer(serializers.ModelSerializer):
             'specialities': {'required': True, 'allow_empty': False, },
         }
 
+    def validate(self, attrs):
+        attrs = super(ResidentUpdateSerializer, self).validate(attrs)
+
+        if attrs.get('state_license', False) and \
+                not attrs.get('state_license_states', []):
+            raise serializers.ValidationError({
+                'state_license_states': [
+                    'You must choose at least one state where you '
+                    'have state licence'
+                ]
+            })
+
+        return attrs
+
 
 class ResidentFillProfileSerializer(ResidentUpdateSerializer):
     class Meta(ResidentUpdateSerializer.Meta):
@@ -52,7 +67,7 @@ class ResidentFillProfileSerializer(ResidentUpdateSerializer):
 
             # Not required fields
             'earliest_availability_for_shift', 'preferences_for_work_location',
-            'state_license', 'state_license_state', 'federal_dea_active',
+            'state_license', 'state_license_states', 'federal_dea_active',
             'bls_acls_pals', 'active_permanent_residence_card_or_visa',
             'active_current_driver_license_or_passport', 'active_npi_number',
             'ecfmg', 'active_board_certificates',

@@ -1,9 +1,11 @@
 from django.test import TestCase, mock
 
 from apps.accounts.factories import ResidentFactory
-from apps.shifts.factories import MessageFactory, ApplicationFactory, \
-    ShiftFactory
-from apps.shifts.services.message import process_message_creation
+from apps.shifts.factories import (
+    MessageFactory, ApplicationFactory, ShiftFactory)
+from apps.shifts.models import Message
+from apps.shifts.services.message import (
+    process_message_creation, create_message)
 
 
 class MessageServiceTestCase(TestCase):
@@ -33,4 +35,19 @@ class MessageServiceTestCase(TestCase):
 
         process_message_creation(message, notify=False)
 
-        self.assertFalse(mock_notify_message_created.called)
+        mock_notify_message_created.assert_not_called()
+
+    def test_create_message_without_text_does_not_create_message(self):
+        message = create_message(self.application, self.resident, '')
+
+        self.assertIsNone(message)
+
+    def test_create_message_with_text_creates_message(self):
+        message = create_message(self.application, self.resident, 'Comment')
+
+        self.assertIsNotNone(message)
+
+        # Refresh message to fetch actual data from db
+        message = Message.objects.get(pk=message.pk)
+        self.assertEqual(message.owner, self.resident.user_ptr)
+        self.assertEqual(message.text, 'Comment')

@@ -14,7 +14,7 @@ class SchedulerCreateSerializer(UserCreateSerializer):
     class Meta:
         model = Scheduler
         fields = ('pk', 'email', 'first_name', 'last_name', 'department_name',
-                  'facility_name', 'password', )
+                  'facility_name', 'password', 'timezone', )
 
 
 class SchedulerUpdateSerializer(serializers.ModelSerializer):
@@ -22,5 +22,5 @@ class SchedulerUpdateSerializer(serializers.ModelSerializer):
         model = Scheduler
         fields = (
             'pk', 'email', 'first_name', 'last_name', 'department_name',
-            'facility_name',
+            'facility_name', 'timezone',
         )
