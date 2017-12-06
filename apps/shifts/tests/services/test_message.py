@@ -35,7 +35,7 @@ class MessageServiceTestCase(TestCase):
 
         process_message_creation(message, notify=False)
 
-        self.assertFalse(mock_notify_message_created.called)
+        mock_notify_message_created.assert_not_called()
 
     def test_create_message_without_text_does_not_create_message(self):
         message = create_message(self.application, self.resident, '')

@@ -160,7 +160,9 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         self.assertEqual(shift.payment_per_hour, data['payment_per_hour'])
         mock_process_shift_creation.assert_called_with(shift)
 
-    def test_bulk_create_by_scheduler_success(self):
+    @mock.patch(
+        'apps.shifts.viewsets.shift.process_shift_creation', autospec=True)
+    def test_bulk_create_by_scheduler_success(self, mock_process_shift_creation):
         """
         A scheduler should create some shifts and them should be by himself 
         """
@@ -175,6 +177,9 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
                   for shift_data in resp.data]
         self.assertEqual(shifts[0].owner, self.scheduler)
         self.assertEqual(shifts[1].owner, self.scheduler)
+        mock_process_shift_creation.assert_has_calls(
+            [mock.call(shifts[0]), mock.call(shifts[1])],
+            any_order=True)
 
     def test_update_by_unauthenticated_failed(self):
         data = self.get_shift_data()

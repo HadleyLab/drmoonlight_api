@@ -51,7 +51,8 @@ def process_shift_updating(shift):
     active_applications = shift.applications.filter_active()
 
     if active_applications.exists():
-        suitable_residents = active_applications.all()
+        suitable_residents = [
+            application.owner for application in active_applications.all()]
         is_applicant = True
     else:
         suitable_residents = Resident.objects.filter_for_shift(shift) \
@@ -70,11 +71,10 @@ def process_shift_updating(shift):
 def process_shift_deletion(shift):
     active_applications = shift.applications.filter_active()
 
-    if active_applications.exists():
-        for resident in active_applications.all():
-            with localize_for_user(resident):
-                async_send_mail(
-                    'shift_deleted',
-                    resident.email,
-                    get_context(shift, resident)
-                )
+    for application in active_applications.all():
+        with localize_for_user(application.owner):
+            async_send_mail(
+                'shift_deleted',
+                application.owner.email,
+                get_context(shift, application.owner)
+            )
