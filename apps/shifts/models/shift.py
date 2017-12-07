@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
+from apps.main.utils import get_diff_in_hours
 from contrib.easymoney import MoneyField
 
 from apps.accounts.models import Scheduler, Speciality, ResidencyProgram
@@ -13,6 +14,7 @@ class ShiftStateEnum(object):
     WITHOUT_APPLIES = 'without_applies'
     COVERAGE_COMPLETED = 'coverage_completed'
     REQUIRE_APPROVAL = 'require_approval'
+    ACTIVE = 'active'
 
 
 class ShiftQuerySet(models.QuerySet):
@@ -63,11 +65,13 @@ class Shift(TimestampModelMixin, models.Model):
     )
     speciality = models.ForeignKey(
         Speciality,
-        verbose_name='Speciality'
+        verbose_name='Speciality',
+        related_name='shifts'
     )
     residency_program = models.ForeignKey(
         ResidencyProgram,
         verbose_name='Residency program',
+        related_name='shifts',
         null=True, blank=True
     )
     residency_years_required = models.PositiveIntegerField(
@@ -98,6 +102,17 @@ class Shift(TimestampModelMixin, models.Model):
             self.date_end.strftime('%Y-%m-%d %H:%M'))
 
     @property
+    def length(self):
+        return get_diff_in_hours(self.date_end, self.date_start)
+
+    @property
+    def total_payment_amount(self):
+        if self.payment_per_hour:
+            return self.payment_amount * self.length
+
+        return self.payment_amount
+
+    @property
     def is_started(self):
         return self.date_start <= timezone.now()
 
@@ -111,6 +126,9 @@ class Shift(TimestampModelMixin, models.Model):
 
         if self.is_ended:
             return ShiftStateEnum.COMPLETED
+
+        if self.is_started:
+            return ShiftStateEnum.ACTIVE
 
         applications_count = self.applications.aggregate_count_by_state()
 

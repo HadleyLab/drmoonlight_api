@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^api/', include('rest_framework.urls')),
     url(r'^api/', include('apps.accounts.urls')),
     url(r'^api/', include('apps.shifts.urls')),
+    url(r'^api/', include('apps.main.urls')),
 ]
 
 

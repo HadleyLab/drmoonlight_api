@@ -128,11 +128,13 @@ class Resident(ResidentNotificationSettingsMixin,
     specialities = models.ManyToManyField(
         Speciality,
         verbose_name='Specialities',
+        related_name='residents',
         blank=True
     )
     residency_program = models.ForeignKey(
         ResidencyProgram,
         verbose_name='Residency program',
+        related_name='residents',
         null=True, blank=True
     )
     residency_years = models.PositiveIntegerField(
