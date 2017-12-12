@@ -10,6 +10,7 @@ from apps.main.models import TimestampModelMixin
 
 
 class ShiftStateEnum(object):
+    FAILED = 'failed'
     COMPLETED = 'completed'
     WITHOUT_APPLIES = 'without_applies'
     COVERAGE_COMPLETED = 'coverage_completed'
@@ -124,15 +125,19 @@ class Shift(TimestampModelMixin, models.Model):
     def state(self):
         from .application import ApplicationStateEnum
 
+        applications_count = self.applications.aggregate_count_by_state()
+        confirmed = applications_count.get(ApplicationStateEnum.CONFIRMED, 0)
+        completed = applications_count.get(ApplicationStateEnum.COMPLETED, 0)
+
         if self.is_ended:
-            return ShiftStateEnum.COMPLETED
+            if confirmed or completed:
+                return ShiftStateEnum.COMPLETED
+            else:
+                return ShiftStateEnum.FAILED
 
         if self.is_started:
             return ShiftStateEnum.ACTIVE
 
-        applications_count = self.applications.aggregate_count_by_state()
-
-        confirmed = applications_count.get(ApplicationStateEnum.CONFIRMED, 0)
         approved = applications_count.get(ApplicationStateEnum.APPROVED, 0)
         if confirmed or approved:
             return ShiftStateEnum.COVERAGE_COMPLETED

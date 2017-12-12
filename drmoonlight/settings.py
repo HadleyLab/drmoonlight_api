@@ -15,10 +15,21 @@ import dj_database_url
 
 
 # Celery settings
+from celery.schedules import crontab
+
 CELERY_BROKER_URL = os.environ.get('BROKER_URL', 'redis://redis/1')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+
+CELERY_BEAT_SCHEDULE = {
+    'daily-make-confirmed-applications-completed': {
+        'task': 'apps.shifts.tasks.'
+                'daily_make_confirmed_applications_completed_for_ended_shifts',
+        'schedule': crontab(minute='0', hour='0'),
+    },
+}
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

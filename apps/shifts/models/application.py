@@ -175,7 +175,8 @@ class Application(TimestampModelMixin, models.Model):
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,
                 target=ApplicationStateEnum.APPROVED,
-                permission=can_scheduler_change_application)
+                permission=can_scheduler_change_application,
+                conditions=[lambda self: not self.shift.is_started])
     def approve(self, data):
         """
         Approves the application and postpone all other
@@ -213,7 +214,8 @@ class Application(TimestampModelMixin, models.Model):
     @transition(field=state,
                 source=ApplicationStateEnum.NEW,
                 target=ApplicationStateEnum.REJECTED,
-                permission=can_scheduler_change_application)
+                permission=can_scheduler_change_application,
+                conditions=[lambda self: not self.shift.is_started])
     def reject(self, data):
         """
         Rejects  the application
@@ -223,7 +225,8 @@ class Application(TimestampModelMixin, models.Model):
     @transition(field=state,
                 source=ApplicationStateEnum.APPROVED,
                 target=ApplicationStateEnum.CONFIRMED,
-                permission=can_resident_change_application)
+                permission=can_resident_change_application,
+                conditions=[lambda self: not self.shift.is_started])
     def confirm(self, data):
         """
         Confirms the application
@@ -264,8 +267,7 @@ class Application(TimestampModelMixin, models.Model):
                 source=ApplicationStateEnum.CONFIRMED,
                 target=ApplicationStateEnum.COMPLETED,
                 permission=can_scheduler_change_application,
-                conditions=[lambda application: application.shift.is_ended]
-    )
+                conditions=[lambda self: self.shift.is_ended])
     def complete(self, data):
         """
         Completes the application
