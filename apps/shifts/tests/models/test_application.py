@@ -157,6 +157,24 @@ class ApplicationTest(TestCase):
         self.assertFalse(has_transition_perm(
             another_application.approve, self.scheduler.user_ptr))
 
+    def test_can_approve_not_started_shift(self):
+        application = ApplicationFactory.create(
+            owner=self.resident, shift=self.shift,
+            state=ApplicationStateEnum.NEW)
+
+        self.assertTrue(can_proceed(application.approve))
+
+    def test_can_not_approve_started_shift(self):
+        self.shift.date_start = timezone.now() - timedelta(hours=2)
+        self.shift.date_end = timezone.now() - timedelta(hours=1)
+        self.shift.save()
+        application = ApplicationFactory.create(
+            owner=self.resident,
+            shift=self.shift,
+            state=ApplicationStateEnum.NEW)
+
+        self.assertFalse(can_proceed(application.approve))
+        
     @mock.patch(
         'apps.shifts.models.application.process_rejecting', autospec=True)
     def test_reject(self, mock_process_rejecting):
@@ -184,6 +202,24 @@ class ApplicationTest(TestCase):
         self.assertTrue(has_transition_perm(
             application.reject, self.scheduler.user_ptr))
 
+    def test_can_reject_not_started_shift(self):
+        application = ApplicationFactory.create(
+            owner=self.resident, shift=self.shift,
+            state=ApplicationStateEnum.NEW)
+
+        self.assertTrue(can_proceed(application.reject))
+
+    def test_can_not_reject_started_shift(self):
+        self.shift.date_start = timezone.now() - timedelta(hours=2)
+        self.shift.date_end = timezone.now() - timedelta(hours=1)
+        self.shift.save()
+        application = ApplicationFactory.create(
+            owner=self.resident,
+            shift=self.shift,
+            state=ApplicationStateEnum.NEW)
+
+        self.assertFalse(can_proceed(application.reject))
+        
     @mock.patch(
         'apps.shifts.models.application.process_confirming', autospec=True)
     def test_confirm(self, mock_process_confirming):
@@ -213,6 +249,24 @@ class ApplicationTest(TestCase):
         self.assertFalse(has_transition_perm(
             application.confirm, self.scheduler.user_ptr))
 
+    def test_can_confirm_not_started_shift(self):
+        application = ApplicationFactory.create(
+            owner=self.resident, shift=self.shift,
+            state=ApplicationStateEnum.APPROVED)
+
+        self.assertTrue(can_proceed(application.confirm))
+
+    def test_can_not_confirm_started_shift(self):
+        self.shift.date_start = timezone.now() - timedelta(hours=2)
+        self.shift.date_end = timezone.now() - timedelta(hours=1)
+        self.shift.save()
+        application = ApplicationFactory.create(
+            owner=self.resident,
+            shift=self.shift,
+            state=ApplicationStateEnum.APPROVED)
+
+        self.assertFalse(can_proceed(application.confirm))
+        
     @mock.patch(
         'apps.shifts.models.application.process_cancelling', autospec=True)
     @mock.patch(
@@ -396,14 +450,14 @@ class ApplicationTest(TestCase):
         self.assertTrue(has_transition_perm(
             application.complete, self.scheduler.user_ptr))
 
-    def test_complete_not_ended_shift_failed(self):
+    def test_can_not_complete_not_ended_shift(self):
         application = ApplicationFactory.create(
             owner=self.resident, shift=self.shift,
             state=ApplicationStateEnum.CONFIRMED)
 
         self.assertFalse(can_proceed(application.complete))
 
-    def test_complete_ended_shift_success(self):
+    def test_can_complete_ended_shift(self):
         self.shift.date_start = timezone.now() - timedelta(hours=2)
         self.shift.date_end = timezone.now() - timedelta(hours=1)
         self.shift.save()

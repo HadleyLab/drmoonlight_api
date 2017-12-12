@@ -33,7 +33,7 @@ class ShiftTest(TestCase):
         self.shift.save()
         self.assertFalse(self.shift.is_ended)
 
-    def test_state(self):
+    def test_state_for_not_started_shift(self):
         self.assertEqual(self.shift.state, ShiftStateEnum.WITHOUT_APPLIES)
 
         application = ApplicationFactory.create(
@@ -49,6 +49,34 @@ class ShiftTest(TestCase):
         application.save()
         self.assertEqual(self.shift.state, ShiftStateEnum.WITHOUT_APPLIES)
 
+    def test_state_for_started_shift(self):
+        self.shift.date_start = timezone.now() - timedelta(hours=1)
+        self.shift.save()
+
+        self.assertEqual(self.shift.state, ShiftStateEnum.ACTIVE)
+
+    def test_state_for_ended_shift(self):
         self.shift.date_end = timezone.now() - timedelta(hours=1)
         self.shift.save()
+
+        self.assertEqual(self.shift.state, ShiftStateEnum.FAILED)
+
+        application = ApplicationFactory.create(
+            shift=self.shift, state=ApplicationStateEnum.NEW)
+        self.assertEqual(self.shift.state, ShiftStateEnum.FAILED)
+
+        application.state = ApplicationStateEnum.CANCELLED
+        application.save()
+        self.assertEqual(self.shift.state, ShiftStateEnum.FAILED)
+
+        application.state = ApplicationStateEnum.APPROVED
+        application.save()
+        self.assertEqual(self.shift.state, ShiftStateEnum.FAILED)
+
+        application.state = ApplicationStateEnum.CONFIRMED
+        application.save()
+        self.assertEqual(self.shift.state, ShiftStateEnum.COMPLETED)
+
+        application.state = ApplicationStateEnum.COMPLETED
+        application.save()
         self.assertEqual(self.shift.state, ShiftStateEnum.COMPLETED)
