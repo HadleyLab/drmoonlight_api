@@ -88,6 +88,7 @@ PROJECT_APPS = [
 
 THIRD_PARTY_APPS = [
     'dbmail',
+    'contrib.dbmail_patch',
     'ckeditor',
     'channels',
     'rest_framework',
@@ -108,6 +109,10 @@ if DEBUG_EMAIL:  # pragma: no cover
     THIRD_PARTY_APPS.append('db_email_backend')
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
+
+MIGRATION_MODULES = {
+    'dbmail': 'contrib.dbmail_patch.migrations',
+}
 
 # MIDDLEWARE CONFIGURATION
 MIDDLEWARE_CLASSES = [
