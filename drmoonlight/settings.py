@@ -111,7 +111,7 @@ if DEBUG_EMAIL:  # pragma: no cover
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
 MIGRATION_MODULES = {
-    'dbmail': 'contrib.dbmail_patch.migrations',
+    'dbmail': 'contrib.external_migrations.dbmail',
 }
 
 # MIDDLEWARE CONFIGURATION
