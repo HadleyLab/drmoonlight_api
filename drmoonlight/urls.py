@@ -33,3 +33,5 @@ if settings.DEBUG:
                           document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL,
                           document_root=settings.STATIC_ROOT)
+
+handler404 = 'apps.main.views.not_found_view'
