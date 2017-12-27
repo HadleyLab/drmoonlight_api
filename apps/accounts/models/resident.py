@@ -113,9 +113,12 @@ class ResidentQuerySet(models.QuerySet):
         if shift.residency_program:
             filter_kwargs['residency_program'] = shift.residency_program
 
-        return self.filter(state=ResidentStateEnum.APPROVED).filter(
+        return self.filter_approved().filter(
             **filter_kwargs
         )
+
+    def filter_approved(self):
+        return self.filter(state=ResidentStateEnum.APPROVED)
 
 
 class ResidentManager(models.Manager.from_queryset(ResidentQuerySet),

@@ -21,7 +21,7 @@ def statistics(request):
 
     available_shifts_count = Shift.objects.filter(
         date_start__gt=now).count()
-    residents_count = Resident.objects.count()
+    residents_count = Resident.objects.filter_approved().count()
     required_specialities_top = Speciality.objects.annotate(
         shifts_count=Count('shifts')
     ).order_by('-shifts_count').values('pk', 'name', 'shifts_count')
@@ -33,7 +33,7 @@ def statistics(request):
         .values('month') \
         .annotate(count=Count('pk')) \
         .values('month', 'count') \
-        .aggregate(average=Avg('count'))['average']
+        .aggregate(average=Avg('count'))['average'] or 0
     all_completed_shifts = Shift.objects.filter(
         date_start__gte=now,
         applications__state=ApplicationStateEnum.COMPLETED)
