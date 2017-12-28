@@ -53,10 +53,20 @@ class ApplicationServiceTestCase(TestCase):
 
     def test_process_application_works_without_errors(
             self, mock_create_message):
-        process_application(self.application)
+        process_application(self.application, 'Comment')
+
+        mock_create_message.assert_called_with(
+            self.application,
+            self.resident,
+            'Comment')
 
     def test_process_invitation_works_without_errors(self, mock_create_message):
-        process_invitation(self.application)
+        process_invitation(self.application, 'Comment')
+
+        mock_create_message.assert_called_with(
+            self.application,
+            self.scheduler,
+            'Comment')
 
     def test_process_approving_works_without_errors(self, mock_create_message):
         mock_create_message.return_value = MessageFactory.create(

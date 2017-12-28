@@ -16,6 +16,7 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
     def get_apply_data(self, **kwargs):
         data = {
             'shift': self.first_shift.pk,
+            'text': 'Comment',
         }
         data.update(**kwargs)
 
@@ -126,12 +127,13 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         self.assertEqual(application.owner, self.approved_resident)
 
         mock_process_application.assert_called_with(
-            application)
+            application, data['text'])
 
     def get_invite_data(self, **kwargs):
         data = {
             'shift': self.first_shift.pk,
             'owner': self.approved_resident.pk,
+            'text': 'Comment',
         }
         data.update(**kwargs)
 
@@ -245,7 +247,7 @@ class ApplicationViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         self.assertEqual(application.owner, self.approved_resident)
 
         mock_process_invitation.assert_called_with(
-            application)
+            application, data['text'])
 
     def test_list_by_unauthenticated_failed(self):
         resp = self.client.get('/api/shifts/application/')

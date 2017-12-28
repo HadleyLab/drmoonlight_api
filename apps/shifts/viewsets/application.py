@@ -58,8 +58,10 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
 
     @transaction.atomic
     def perform_apply(self, serializer):
+        comment = serializer.validated_data.pop('text')
+
         instance = serializer.save()
-        process_application(instance)
+        process_application(instance, comment)
 
         return instance
 
@@ -80,7 +82,9 @@ class ApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     @transaction.atomic
     def perform_invite(self, serializer):
         # TODO: discuss invitation state
+        comment = serializer.validated_data.pop('text')
+
         instance = serializer.save()
-        process_invitation(instance)
+        process_invitation(instance, comment)
 
         return instance
