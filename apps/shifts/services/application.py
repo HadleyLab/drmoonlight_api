@@ -37,21 +37,25 @@ def get_context(application, comment=None):
     return context
 
 
-def process_application(application):
+def process_application(application, comment):
+    create_message(application, application.owner, comment)
+
     with localize_for_user(application.shift.owner):
         async_send_mail(
             'application_created',
             application.shift.owner.email,
-            get_context(application)
+            get_context(application, comment)
         )
 
 
-def process_invitation(application):
+def process_invitation(application, comment):
+    create_message(application, application.shift.owner, comment)
+
     with localize_for_user(application.owner):
         async_send_mail(
             'invitation_created',
             application.owner.email,
-            get_context(application)
+            get_context(application, comment)
         )
 
 

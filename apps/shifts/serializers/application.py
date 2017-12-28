@@ -23,9 +23,12 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
 
 class BaseApplicationCreateSerializer(serializers.ModelSerializer):
+    text = serializers.CharField(
+        required=True, allow_blank=False, allow_null=False, write_only=True)
+
     class Meta:
         model = Application
-        fields = ('pk', 'owner', 'shift', )
+        fields = ('pk', 'owner', 'shift', 'text', )
 
     def validate_shift(self, shift):
         if shift.is_started:
@@ -72,10 +75,6 @@ class ApplicationCreateSerializer(BaseApplicationCreateSerializer):
 
 
 class InvitationCreateSerializer(BaseApplicationCreateSerializer):
-    class Meta:
-        model = Application
-        fields = ('pk', 'owner', 'shift', )
-
     def validate_shift(self, shift):
         shift = super(InvitationCreateSerializer, self).validate_shift(shift)
         user = self.context['request'].user
