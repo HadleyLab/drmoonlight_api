@@ -5,7 +5,7 @@ from django.utils import timezone
 from apps.main.utils import get_diff_in_hours
 from contrib.easymoney import MoneyField
 
-from apps.accounts.models import Scheduler, Speciality, ResidencyProgram
+from apps.accounts.models import Scheduler, Speciality
 from apps.main.models import TimestampModelMixin
 
 
@@ -29,8 +29,6 @@ class ShiftQuerySet(models.QuerySet):
         if resident.is_approved:
             # An approved resident can see only suitable shifts for him
             return self.filter(
-                Q(residency_program=resident.residency_program) |
-                Q(residency_program__isnull=True),
                 speciality__in=resident.specialities.all(),
                 residency_years_required__lte=resident.residency_years
             )
@@ -68,12 +66,6 @@ class Shift(TimestampModelMixin, models.Model):
         Speciality,
         verbose_name='Speciality',
         related_name='shifts'
-    )
-    residency_program = models.ForeignKey(
-        ResidencyProgram,
-        verbose_name='Residency program',
-        related_name='shifts',
-        null=True, blank=True
     )
     residency_years_required = models.PositiveIntegerField(
         verbose_name='Residency years required',

@@ -14,9 +14,6 @@ def get_shift_context(shift):
         'department_name': shift.owner.department_name,
         'speciality_name': shift.speciality.name,
         'residency_years_required': shift.residency_years_required,
-        'residency_program_name':
-            shift.residency_program.name
-            if shift.residency_program else None,
         'payment_amount': shift.payment_amount,
         'payment_per_hour': shift.payment_per_hour,
         'description': shift.description,

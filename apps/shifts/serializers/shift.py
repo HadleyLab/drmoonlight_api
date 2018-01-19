@@ -13,7 +13,7 @@ class ShiftSerializer(serializers.ModelSerializer):
         model = Shift
         fields = (
             'pk', 'owner', 'date_created', 'date_modified', 'date_end',
-            'date_start', 'speciality', 'residency_program',
+            'date_start', 'speciality',
             'residency_years_required', 'payment_amount', 'payment_per_hour',
             'description', 'state', 'has_already_applied', )
 
