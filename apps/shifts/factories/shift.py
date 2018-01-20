@@ -3,13 +3,12 @@ from django.utils import timezone
 from factory import DjangoModelFactory, SubFactory, lazy_attribute
 
 from apps.accounts.factories import (
-    ResidencyProgramFactory, SpecialityFactory, SchedulerFactory)
+    SpecialityFactory, SchedulerFactory)
 from apps.shifts.models import Shift
 
 
 class ShiftFactory(DjangoModelFactory):
     owner = SubFactory(SchedulerFactory)
-    residency_program = SubFactory(ResidencyProgramFactory)
     speciality = SubFactory(SpecialityFactory)
     payment_amount = 20
     payment_per_hour = True

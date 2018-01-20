@@ -25,14 +25,12 @@ class  ShiftServiceTestCase(TestCase):
         ResidentFactory.create(
             state=ResidentStateEnum.APPROVED,
             specialities=[self.shift.speciality],
-            residency_program=self.shift.residency_program,
             residency_years=self.shift.residency_years_required,
             notification_new_shifts=False
         )
         suitable_resident = ResidentFactory.create(
             state=ResidentStateEnum.APPROVED,
             specialities=[self.shift.speciality],
-            residency_program=self.shift.residency_program,
             residency_years=self.shift.residency_years_required)
 
         process_shift_creation(self.shift)
@@ -45,7 +43,6 @@ class  ShiftServiceTestCase(TestCase):
         ResidentFactory.create(
             state=ResidentStateEnum.APPROVED,
             specialities=[self.shift.speciality],
-            residency_program=self.shift.residency_program,
             residency_years=self.shift.residency_years_required)
 
         process_shift_creation(self.shift)
@@ -57,7 +54,6 @@ class  ShiftServiceTestCase(TestCase):
         ResidentFactory.create(
             state=ResidentStateEnum.APPROVED,
             specialities=[self.shift.speciality],
-            residency_program=self.shift.residency_program,
             residency_years=self.shift.residency_years_required)
 
         process_shift_updating(self.shift)
@@ -76,7 +72,6 @@ class  ShiftServiceTestCase(TestCase):
         suitable_resident = ResidentFactory.create(
             state=ResidentStateEnum.APPROVED,
             specialities=[self.shift.speciality],
-            residency_program=self.shift.residency_program,
             residency_years=self.shift.residency_years_required)
 
         process_shift_updating(self.shift)
@@ -90,7 +85,7 @@ class  ShiftServiceTestCase(TestCase):
 
     @mock.patch('apps.shifts.services.shift.async_send_mail', autospec=True)
     def test_process_shift_deletion_without_active_applications_works_correctly(
-            self, mock_async_send_mail):
+         self, mock_async_send_mail):
         self.application.state = ApplicationStateEnum.CANCELLED
         self.application.save()
         

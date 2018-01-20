@@ -7,7 +7,6 @@ from apps.accounts.services.resident import process_resident_approving, \
 from .choices import US_STATES
 from .user import User, UserManager
 from .speciality import Speciality
-from .residency_program import ResidencyProgram
 
 
 class ResidentProfileSettingsMixin(models.Model):
@@ -110,8 +109,6 @@ class ResidentQuerySet(models.QuerySet):
             'residency_years__gte': shift.residency_years_required,
             'specialities': shift.speciality,
         }
-        if shift.residency_program:
-            filter_kwargs['residency_program'] = shift.residency_program
 
         return self.filter_approved().filter(
             **filter_kwargs
@@ -134,10 +131,8 @@ class Resident(ResidentNotificationSettingsMixin,
         related_name='residents',
         blank=True
     )
-    residency_program = models.ForeignKey(
-        ResidencyProgram,
+    residency_program = models.TextField(
         verbose_name='Residency program',
-        related_name='residents',
         null=True, blank=True
     )
     residency_years = models.PositiveIntegerField(

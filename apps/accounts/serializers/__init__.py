@@ -6,4 +6,3 @@ from .scheduler import (
 from .user import UserSerializer
 from .default import CurrentUserResidentDefault, CurrentUserSchedulerDefault
 from .speciality import SpecialitySerializer
-from .residency_program import ResidencyProgramSerializer

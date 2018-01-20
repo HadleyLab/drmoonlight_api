@@ -1,5 +1,4 @@
-from apps.accounts.factories import ResidentFactory, SpecialityFactory, \
-    ResidencyProgramFactory
+from apps.accounts.factories import ResidentFactory, SpecialityFactory
 from apps.accounts.models import Resident, ResidentStateEnum
 from apps.main.tests import APITestCase
 
@@ -94,7 +93,6 @@ class ResidentViewSetTestCase(APITestCase):
         self.authenticate_as_resident()
         data = {
             'specialities': [SpecialityFactory.create().pk, ],
-            'residency_program': ResidencyProgramFactory.create().pk,
             'residency_years': 2017,
         }
         resp = self.client.patch('/api/accounts/resident/{0}/'.format(
@@ -105,16 +103,12 @@ class ResidentViewSetTestCase(APITestCase):
         self.assertSetEqual(
             set(self.resident.specialities.values_list('pk', flat=True)),
             set(data['specialities']))
-        self.assertEqual(
-            self.resident.residency_program.pk,
-            data['residency_program'])
         self.assertEqual(self.resident.residency_years, data['residency_years'])
 
     def test_update_without_state_license_without_states_success(self):
         self.authenticate_as_resident()
         data = {
             'specialities': [SpecialityFactory.create().pk, ],
-            'residency_program': ResidencyProgramFactory.create().pk,
             'residency_years': 2017,
             'state_license': False,
             'state_license_states': [],
@@ -127,7 +121,6 @@ class ResidentViewSetTestCase(APITestCase):
         self.authenticate_as_resident()
         data = {
             'specialities': [SpecialityFactory.create().pk, ],
-            'residency_program': ResidencyProgramFactory.create().pk,
             'residency_years': 2017,
             'state_license': True,
             'state_license_states': [],
@@ -143,7 +136,6 @@ class ResidentViewSetTestCase(APITestCase):
         self.authenticate_as_resident()
         data = {
             'specialities': [SpecialityFactory.create().pk, ],
-            'residency_program': ResidencyProgramFactory.create().pk,
             'residency_years': 2017,
             'state_license': True,
             'state_license_states': ['AL', 'AK'],
@@ -169,7 +161,6 @@ class ResidentViewSetTestCase(APITestCase):
         self.authenticate_as_resident()
         data = {
             'specialities': [SpecialityFactory.create().pk, ],
-            'residency_program': ResidencyProgramFactory.create().pk,
             'residency_years': 2017,
         }
         resp = self.client.post(
@@ -185,9 +176,6 @@ class ResidentViewSetTestCase(APITestCase):
         self.assertSetEqual(
             set(self.resident.specialities.values_list('pk', flat=True)),
             set(data['specialities']))
-        self.assertEqual(
-            self.resident.residency_program.pk,
-            data['residency_program'])
         self.assertEqual(self.resident.residency_years, data['residency_years'])
 
     def test_approve_by_account_manager_success(self):

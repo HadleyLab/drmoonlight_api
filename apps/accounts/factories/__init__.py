@@ -5,5 +5,4 @@ from .account_manager import AccountManagerFactory
 from .superuser import SuperUserFactory
 
 from .speciality import SpecialityFactory
-from .residency_program import ResidencyProgramFactory
 from .token import TokenFactory

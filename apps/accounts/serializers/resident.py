@@ -38,7 +38,6 @@ class ResidentUpdateSerializer(serializers.ModelSerializer):
             'notification_new_messages',
         )
         extra_kwargs = {
-            'residency_program': {'required': True, 'allow_null': False, },
             'residency_years': {'required': True, 'allow_null': False, },
             'specialities': {'required': True, 'allow_empty': False, },
         }
