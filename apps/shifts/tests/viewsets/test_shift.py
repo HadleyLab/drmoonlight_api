@@ -81,7 +81,6 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         data = {
             'date_start': future_date_start.strftime('%Y-%m-%dT%H:%MZ'),
             'date_end': future_date_end.strftime('%Y-%m-%dT%H:%MZ'),
-            'residency_program': self.residency_program.pk,
             'residency_years_required': 0,
             'speciality': self.first_speciality.pk,
             'payment_per_hour': True,
@@ -152,7 +151,6 @@ class ShiftViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         self.assertIsNotNone(shift.date_end)
         self.assertEqual(shift.owner, self.scheduler)
         self.assertEqual(shift.description, data['description'])
-        self.assertEqual(shift.residency_program.pk, data['residency_program'])
         self.assertEqual(
             shift.residency_years_required, data['residency_years_required'])
         self.assertEqual(shift.speciality.pk, data['speciality'])
