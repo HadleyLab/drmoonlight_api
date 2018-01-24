@@ -10,8 +10,8 @@ class SchedulerAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         (_('Personal info'), {'fields': (
-            'first_name', 'last_name', 'facility_name',
-            'department_name', )}),
+            'first_name', 'last_name', 'avatar',
+            'facility_name', 'department_name', )}),
         (_('Permissions'), {'fields': ('is_active', )}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined', )}),
     )

@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 
+from apps.accounts.fields import AvatarField
 from .choices import TIMEZONES
 
 
@@ -59,6 +60,8 @@ class User(AbstractUser):
         choices=TIMEZONES,
         default=settings.TIME_ZONE
     )
+    avatar = AvatarField(
+        blank=True, null=True)
 
     # Remove username field from AbstractUser
     username = None
