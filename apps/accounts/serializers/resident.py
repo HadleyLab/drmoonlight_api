@@ -13,8 +13,8 @@ class ResidentSerializer(serializers.ModelSerializer):
 class ResidentCreateSerializer(UserCreateSerializer):
     class Meta:
         model = Resident
-        fields = ('pk', 'email', 'first_name', 'last_name', 'password',
-                  'timezone', )
+        fields = ('pk', 'email', 'first_name', 'last_name', 'avatar',
+                  'password', 'timezone', )
 
 
 class ResidentUpdateSerializer(serializers.ModelSerializer):
