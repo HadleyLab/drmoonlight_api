@@ -1,3 +1,8 @@
+import os
+import re
+
+from django.conf import settings
+
 from apps.accounts.factories import ResidentFactory, SpecialityFactory
 from apps.accounts.models import Resident, ResidentStateEnum
 from apps.main.tests import APITestCase
@@ -104,6 +109,25 @@ class ResidentViewSetTestCase(APITestCase):
             set(self.resident.specialities.values_list('pk', flat=True)),
             set(data['specialities']))
         self.assertEqual(self.resident.residency_years, data['residency_years'])
+
+    def test_update_avatar(self):
+        self.authenticate_as_resident()
+        self.assertFalse(self.resident.avatar)
+
+        avatar_path = os.path.join(
+            settings.BASE_DIR, 'apps/accounts/tests/fixtures/', 'avatar.jpg')
+        data = {
+            'avatar': open(avatar_path, 'rb')
+        }
+        resp = self.client.patch('/api/accounts/resident/{0}/'.format(
+            self.resident.pk), data, format='multipart')
+        self.assertSuccessResponse(resp)
+        self.assertIsNotNone(
+            re.findall('/media/avatars/Resident/{0}'.format(self.resident.pk),
+                       resp.data['avatar']))
+
+        self.resident.refresh_from_db()
+        self.assertTrue(self.resident.avatar)
 
     def test_update_without_state_license_without_states_success(self):
         self.authenticate_as_resident()

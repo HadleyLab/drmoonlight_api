@@ -1,3 +1,8 @@
+import os
+import re
+
+from django.conf import settings
+
 from apps.accounts.factories import SchedulerFactory
 from apps.accounts.models import Scheduler
 from apps.main.tests import APITestCase
@@ -109,3 +114,22 @@ class SchedulerViewSetTestCase(APITestCase):
         self.assertEqual(
             self.scheduler.department_name, data['department_name'])
         self.assertEqual(self.scheduler.facility_name, data['facility_name'])
+
+    def test_update_avatar(self):
+        self.authenticate_as_scheduler()
+        self.assertFalse(self.scheduler.avatar)
+
+        avatar_path = os.path.join(
+            settings.BASE_DIR, 'apps/accounts/tests/fixtures/', 'avatar.jpg')
+        data = {
+            'avatar': open(avatar_path, 'rb')
+        }
+        resp = self.client.patch('/api/accounts/scheduler/{0}/'.format(
+            self.scheduler.pk), data, format='multipart')
+        self.assertSuccessResponse(resp)
+        self.assertIsNotNone(
+            re.findall('/media/avatars/Scheduler/{0}'.format(self.scheduler.pk),
+                       resp.data['avatar']))
+
+        self.scheduler.refresh_from_db()
+        self.assertTrue(self.scheduler.avatar)

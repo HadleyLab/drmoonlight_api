@@ -22,8 +22,8 @@ class ResidentUpdateSerializer(serializers.ModelSerializer):
         model = Resident
         fields = (
             # Required fields
-            'pk', 'email', 'first_name', 'last_name', 'residency_program',
-            'residency_years', 'specialities', 'timezone',
+            'pk', 'email', 'first_name', 'last_name', 'avatar',
+            'residency_program', 'residency_years', 'specialities', 'timezone',
 
             # Not required fields
             'earliest_availability_for_shift', 'preferences_for_work_location',
