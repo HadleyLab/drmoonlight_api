@@ -5,7 +5,9 @@ from apps.shifts.models import Message
 
 class MessageSerializer(serializers.ModelSerializer):
 
-    owner_avatar = serializers.ImageField(source='owner.avatar')
+    owner_avatar = serializers.ImageField(
+        source='owner.avatar',
+        read_only=True)
 
     class Meta:
         model = Message
