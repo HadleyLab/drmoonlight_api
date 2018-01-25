@@ -13,6 +13,16 @@ def change_mail_headers(apps, schema_editor):
                 '{{ shift.date_start }}'
     )
 
+    MailTemplate.objects.filter(slug='shift_updated').update(
+        subject='A shift was updated: {{ shift.speciality_name }} at '
+                '{{ shift.date_start }}'
+    )
+
+    MailTemplate.objects.filter(slug='shift_deleted').update(
+        subject='A shift was deleted: {{ shift.speciality_name }} at '
+                '{{ shift.date_start }}'
+    )
+
 
 def clean_cache(apps, schema_editor):
     from dbmail.models import MailTemplate, ApiKey
