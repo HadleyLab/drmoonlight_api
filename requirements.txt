@@ -40,3 +40,4 @@ factory_boy==2.9.2
 Faker==0.8.6
 rednose==1.2.2
 
+sorl-thumbnail==12.4.1

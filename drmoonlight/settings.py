@@ -103,6 +103,7 @@ THIRD_PARTY_APPS = [
     'constance.backends.database',
     'raven.contrib.django.raven_compat',
     'corsheaders',
+    'sorl.thumbnail',
 ]
 
 if DEBUG_EMAIL:  # pragma: no cover

@@ -1,10 +1,15 @@
+import os
+
 from django.contrib.auth.base_user import BaseUserManager
+from django.core.files.base import ContentFile
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from sorl.thumbnail import get_thumbnail, delete as delete_thumbnail
 
 from apps.accounts.fields import AvatarField
 from .choices import TIMEZONES
+from .mixins import ModelDiffMixin
 
 
 class UserManager(BaseUserManager):
@@ -41,7 +46,7 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
-class User(AbstractUser):
+class User(AbstractUser, ModelDiffMixin):
     email = models.EmailField(
         verbose_name='Email address',
         unique=True
@@ -101,3 +106,15 @@ class User(AbstractUser):
             return 'resident'
 
         return 'user'
+
+    def save(self, *args, **kwargs):
+        super(User, self).save(*args, **kwargs)
+        if self.avatar and 'avatar' in self.changed_fields:
+            # TODO maybe move to celery task?
+            thumb = get_thumbnail(self.avatar, '100x100',
+                                  crop='center', quality=90)
+            old_avatar = self.avatar.path
+            self.avatar.save(self.avatar.name, ContentFile(thumb.read()), False)
+            delete_thumbnail(thumb)
+            os.remove(old_avatar)
+            User.objects.filter(pk=self.pk).update(avatar=self.avatar)
