@@ -228,3 +228,30 @@ class ResidentViewSetTestCase(APITestCase):
 
         # There is only one resident in profile filled state
         self.assertEqual(len(resp.data), 1)
+
+    def test_update_cv_link_success(self):
+        self.authenticate_as_resident()
+        self.assertIsNone(self.resident.cv_link)
+
+        data = {
+            'cv_link': 'http://ya.ru'
+        }
+        resp = self.client.patch('/api/accounts/resident/{0}/'.format(
+            self.resident.pk), data, format='json')
+        self.assertSuccessResponse(resp)
+
+        self.resident.refresh_from_db()
+        self.assertEqual(self.resident.cv_link, 'http://ya.ru')
+
+    def test_update_cv_link_fail(self):
+        self.authenticate_as_resident()
+        self.assertIsNone(self.resident.cv_link)
+
+        data = {
+            'cv_link': 'bad_link'
+        }
+        resp = self.client.patch('/api/accounts/resident/{0}/'.format(
+            self.resident.pk), data, format='json')
+        self.assertBadRequest(resp)
+        self.assertSetEqual(set(resp.data.keys()), {'cv_link'})
+        self.assertIsNone(self.resident.cv_link)
