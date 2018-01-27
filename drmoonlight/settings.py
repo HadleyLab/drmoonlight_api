@@ -345,10 +345,10 @@ USE_S3 = AWS_ACCESS_KEY_ID is not None and \
          AWS_STORAGE_BUCKET_NAME is not None
 
 if USE_S3:
-    DEFAULT_FILE_STORAGE = 'reldataentry.awsstorage.MediaStorage'
-else:
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-    MEDIA_URL = '/media/'
+    DEFAULT_FILE_STORAGE = 'drmoonlight.awsstorage.MediaStorage'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 # CONSTANCE SETTINGS
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'

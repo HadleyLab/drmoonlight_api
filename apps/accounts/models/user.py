@@ -113,8 +113,15 @@ class User(AbstractUser, ModelDiffMixin):
             # TODO maybe move to celery task?
             thumb = get_thumbnail(self.avatar, '100x100',
                                   crop='center', quality=90)
-            old_avatar = self.avatar.path
+            if settings.USE_S3:
+                old_avatar = self.avatar.path
+            else:
+                old_avatar = None
+
+            print(thumb.path)
             self.avatar.save(self.avatar.name, ContentFile(thumb.read()), False)
             delete_thumbnail(thumb)
-            os.remove(old_avatar)
+            if old_avatar:
+                os.remove(old_avatar)
+
             User.objects.filter(pk=self.pk).update(avatar=self.avatar)
