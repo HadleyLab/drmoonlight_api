@@ -12,6 +12,7 @@ django-fsm==2.6.0
 django-fsm-admin==1.2.4
 django-picklefield==1.0.0
 django-storages==1.6.5
+boto3==1.5.20
 Django==1.11.6
 djangorestframework==3.7.3
 django-cors-headers==2.1.0
