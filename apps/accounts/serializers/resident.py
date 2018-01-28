@@ -30,7 +30,7 @@ class ResidentUpdateSerializer(serializers.ModelSerializer):
             'state_license', 'state_license_states', 'federal_dea_active',
             'bls_acls_pals', 'active_permanent_residence_card_or_visa',
             'active_current_driver_license_or_passport', 'active_npi_number',
-            'ecfmg', 'active_board_certificates',
+            'ecfmg', 'active_board_certificates', 'cv_link',
 
             # Notifications
             'notification_new_shifts',
@@ -69,5 +69,5 @@ class ResidentFillProfileSerializer(ResidentUpdateSerializer):
             'state_license', 'state_license_states', 'federal_dea_active',
             'bls_acls_pals', 'active_permanent_residence_card_or_visa',
             'active_current_driver_license_or_passport', 'active_npi_number',
-            'ecfmg', 'active_board_certificates',
+            'ecfmg', 'active_board_certificates', 'cv_link',
         )
