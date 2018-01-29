@@ -1,11 +1,13 @@
 from rest_framework import serializers
-from sorl.thumbnail import get_thumbnail
+
+from apps.main.utils import get_avatar_thumbnail
 
 
-class AvatarFieldMixin(serializers.Serializer):
+class AvatarFieldMixin(serializers.ModelSerializer):
     def get_avatar(self, obj):
-        if obj.avatar:
-            return self.context['request'].build_absolute_uri(
-                get_thumbnail(obj.avatar, '100x100',
-                              crop='center', quality=90).url)
+        return get_avatar_thumbnail(obj.avatar, self.context['request'])
 
+    def update(self, instance, validated_data):
+        result = super(AvatarFieldMixin, self).update(instance, validated_data)
+        self.fields['avatar'] = serializers.SerializerMethodField()
+        return result

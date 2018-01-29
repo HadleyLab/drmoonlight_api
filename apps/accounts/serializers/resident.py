@@ -5,7 +5,9 @@ from apps.accounts.models.mixins import AvatarFieldMixin
 from .user import UserCreateSerializer
 
 
-class ResidentSerializer(serializers.ModelSerializer, AvatarFieldMixin):
+class ResidentSerializer(AvatarFieldMixin):
+    avatar = serializers.SerializerMethodField()
+
     class Meta:
         model = Resident
         exclude = ('password', )
@@ -14,11 +16,11 @@ class ResidentSerializer(serializers.ModelSerializer, AvatarFieldMixin):
 class ResidentCreateSerializer(UserCreateSerializer):
     class Meta:
         model = Resident
-        fields = ('pk', 'email', 'first_name', 'last_name', 'avatar',
+        fields = ('pk', 'email', 'first_name', 'last_name',
                   'password', 'timezone', )
 
 
-class ResidentUpdateSerializer(serializers.ModelSerializer):
+class ResidentUpdateSerializer(AvatarFieldMixin):
     class Meta:
         model = Resident
         fields = (
