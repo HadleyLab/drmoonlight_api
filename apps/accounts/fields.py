@@ -1,27 +1,19 @@
-import os
-from uuid import uuid4
-
-from django.db import models
-from django.utils.deconstruct import deconstructible
+import re
+from rest_framework import serializers
 
 
-@deconstructible
-class ClassNameUploadPath(object):
+class MultipartM2MField(serializers.Field):
+    def to_representation(self, obj):
+        return obj.values_list('id', flat=True).order_by('id')
 
-    def __init__(self, sub_path):
-        self.path = sub_path
-
-    def __call__(self, instance, filename):
-        ext = filename.split('.')[-1]
-        if instance.pk:
-            filename = '{}.{}'.format(instance.pk, ext)
-        else:
-            filename = '{}.{}'.format(uuid4().hex, ext)
-        return os.path.join(self.path, instance.__class__.__name__, filename)
+    def to_internal_value(self, data):
+        data = data[1:-1]
+        return data.split(',') if data else []
 
 
-class AvatarField(models.ImageField):
-    def __init__(self, **kwargs):
-        kwargs['upload_to'] = kwargs.get('upload_to',
-                                         ClassNameUploadPath('avatars'))
-        super(AvatarField, self).__init__(**kwargs)
+class MultipartArrayField(serializers.Field):
+    def to_representation(self, obj):
+        return obj
+
+    def to_internal_value(self, data):
+        return re.findall('"(\w{2})"', data)

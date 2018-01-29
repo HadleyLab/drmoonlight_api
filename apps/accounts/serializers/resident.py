@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.accounts.fields import MultipartM2MField, MultipartArrayField
 from apps.accounts.models import Resident
 from apps.accounts.models.mixins import AvatarFieldMixin
 from .user import UserCreateSerializer
@@ -21,6 +22,9 @@ class ResidentCreateSerializer(UserCreateSerializer):
 
 
 class ResidentUpdateSerializer(AvatarFieldMixin):
+    specialities = MultipartM2MField()
+    state_license_states = MultipartArrayField()
+
     class Meta:
         model = Resident
         fields = (
