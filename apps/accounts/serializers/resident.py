@@ -1,10 +1,11 @@
 from rest_framework import serializers
 
 from apps.accounts.models import Resident
+from apps.accounts.models.mixins import AvatarFieldMixin
 from .user import UserCreateSerializer
 
 
-class ResidentSerializer(serializers.ModelSerializer):
+class ResidentSerializer(serializers.ModelSerializer, AvatarFieldMixin):
     class Meta:
         model = Resident
         exclude = ('password', )

@@ -1,10 +1,11 @@
 from rest_framework import serializers
 
 from apps.accounts.models import Scheduler
+from apps.accounts.models.mixins import AvatarFieldMixin
 from .user import UserCreateSerializer
 
 
-class SchedulerSerializer(serializers.ModelSerializer):
+class SchedulerSerializer(serializers.ModelSerializer, AvatarFieldMixin):
     class Meta:
         model = Scheduler
         exclude = ('password', )
