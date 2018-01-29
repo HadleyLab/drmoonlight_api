@@ -1,3 +1,8 @@
+import os
+import re
+
+from django.conf import settings
+
 from apps.accounts.factories import ResidentFactory, SpecialityFactory
 from apps.accounts.models import Resident, ResidentStateEnum
 from apps.main.tests import APITestCase
@@ -91,8 +96,9 @@ class ResidentViewSetTestCase(APITestCase):
 
     def test_update_myself_by_resident_success(self):
         self.authenticate_as_resident()
+        speciality_pk = SpecialityFactory.create().pk
         data = {
-            'specialities': [SpecialityFactory.create().pk, ],
+            'specialities': '[{0}]'.format(speciality_pk),
             'residency_years': 2017,
         }
         resp = self.client.patch('/api/accounts/resident/{0}/'.format(
@@ -102,16 +108,35 @@ class ResidentViewSetTestCase(APITestCase):
         self.resident.refresh_from_db()
         self.assertSetEqual(
             set(self.resident.specialities.values_list('pk', flat=True)),
-            set(data['specialities']))
+            {speciality_pk})
         self.assertEqual(self.resident.residency_years, data['residency_years'])
+
+    def test_update_avatar(self):
+        self.authenticate_as_resident()
+        self.assertFalse(self.resident.avatar)
+
+        avatar_path = os.path.join(
+            settings.BASE_DIR, 'apps/accounts/tests/fixtures/', 'avatar.jpg')
+        data = {
+            'avatar': open(avatar_path, 'rb')
+        }
+        resp = self.client.patch('/api/accounts/resident/{0}/'.format(
+            self.resident.pk), data, format='multipart')
+        self.assertSuccessResponse(resp)
+        self.assertIsNotNone(
+            re.findall('/media/avatars/Resident/{0}'.format(self.resident.pk),
+                       resp.data['avatar']))
+
+        self.resident.refresh_from_db()
+        self.assertTrue(self.resident.avatar)
 
     def test_update_without_state_license_without_states_success(self):
         self.authenticate_as_resident()
         data = {
-            'specialities': [SpecialityFactory.create().pk, ],
+            'specialities': '[{0}]'.format(SpecialityFactory.create().pk),
             'residency_years': 2017,
             'state_license': False,
-            'state_license_states': [],
+            'state_license_states': '[]',
         }
         resp = self.client.patch('/api/accounts/resident/{0}/'.format(
             self.resident.pk), data, format='json')
@@ -120,10 +145,10 @@ class ResidentViewSetTestCase(APITestCase):
     def test_update_with_state_license_without_states_failed(self):
         self.authenticate_as_resident()
         data = {
-            'specialities': [SpecialityFactory.create().pk, ],
+            'specialities': '[{0}]'.format(SpecialityFactory.create().pk),
             'residency_years': 2017,
             'state_license': True,
-            'state_license_states': [],
+            'state_license_states': '[]',
         }
         resp = self.client.patch('/api/accounts/resident/{0}/'.format(
             self.resident.pk), data, format='json')
@@ -135,10 +160,10 @@ class ResidentViewSetTestCase(APITestCase):
     def test_update_with_state_license_with_states_success(self):
         self.authenticate_as_resident()
         data = {
-            'specialities': [SpecialityFactory.create().pk, ],
+            'specialities': '[{0}]'.format(SpecialityFactory.create().pk),
             'residency_years': 2017,
             'state_license': True,
-            'state_license_states': ['AL', 'AK'],
+            'state_license_states': '["AL", "AK"]',
         }
         resp = self.client.patch('/api/accounts/resident/{0}/'.format(
             self.resident.pk), data, format='json')
@@ -159,8 +184,9 @@ class ResidentViewSetTestCase(APITestCase):
 
     def test_fill_profile_by_resident_success(self):
         self.authenticate_as_resident()
+        speciality_pk = SpecialityFactory.create().pk
         data = {
-            'specialities': [SpecialityFactory.create().pk, ],
+            'specialities': '[{0}]'.format(speciality_pk),
             'residency_years': 2017,
         }
         resp = self.client.post(
@@ -175,7 +201,7 @@ class ResidentViewSetTestCase(APITestCase):
             ResidentStateEnum.PROFILE_FILLED)
         self.assertSetEqual(
             set(self.resident.specialities.values_list('pk', flat=True)),
-            set(data['specialities']))
+            {speciality_pk})
         self.assertEqual(self.resident.residency_years, data['residency_years'])
 
     def test_approve_by_account_manager_success(self):

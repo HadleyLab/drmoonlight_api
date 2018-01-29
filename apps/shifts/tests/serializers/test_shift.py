@@ -1,13 +1,14 @@
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 
 from apps.accounts.factories import SchedulerFactory, ResidentFactory
 from apps.shifts.factories import ShiftFactory, ApplicationFactory
+from apps.shifts.factories.request import ExtendedRequestFactory
 from apps.shifts.serializers import ShiftSerializer
 
 
 class ShiftSerializerTestCase(TestCase):
     def setUp(self):
-        self.request = RequestFactory()
+        self.request = ExtendedRequestFactory()
         self.scheduler = SchedulerFactory.create()
         self.resident = ResidentFactory.create()
         self.shift = ShiftFactory.create(owner=self.scheduler)

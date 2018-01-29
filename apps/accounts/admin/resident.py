@@ -13,7 +13,7 @@ class ResidentAdmin(FSMTransitionMixin, UserAdmin):
     fsm_field = ['state', ]
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name', )}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name', 'avatar')}),
         (_('Permissions'), {'fields': ('is_active', 'state', )}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined', )}),
     )

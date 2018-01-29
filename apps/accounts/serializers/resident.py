@@ -1,10 +1,14 @@
 from rest_framework import serializers
 
+from apps.accounts.fields import MultipartM2MField, MultipartArrayField
 from apps.accounts.models import Resident
+from apps.accounts.models.mixins import AvatarFieldMixin
 from .user import UserCreateSerializer
 
 
-class ResidentSerializer(serializers.ModelSerializer):
+class ResidentSerializer(AvatarFieldMixin):
+    avatar = serializers.SerializerMethodField()
+
     class Meta:
         model = Resident
         exclude = ('password', )
@@ -13,17 +17,20 @@ class ResidentSerializer(serializers.ModelSerializer):
 class ResidentCreateSerializer(UserCreateSerializer):
     class Meta:
         model = Resident
-        fields = ('pk', 'email', 'first_name', 'last_name', 'password',
-                  'timezone', )
+        fields = ('pk', 'email', 'first_name', 'last_name',
+                  'password', 'timezone', )
 
 
-class ResidentUpdateSerializer(serializers.ModelSerializer):
+class ResidentUpdateSerializer(AvatarFieldMixin):
+    specialities = MultipartM2MField(required=False)
+    state_license_states = MultipartArrayField(required=False)
+
     class Meta:
         model = Resident
         fields = (
             # Required fields
-            'pk', 'email', 'first_name', 'last_name', 'residency_program',
-            'residency_years', 'specialities', 'timezone',
+            'pk', 'email', 'first_name', 'last_name', 'avatar',
+            'residency_program', 'residency_years', 'specialities', 'timezone',
 
             # Not required fields
             'earliest_availability_for_shift', 'preferences_for_work_location',

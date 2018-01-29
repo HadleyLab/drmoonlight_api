@@ -59,6 +59,9 @@ class User(AbstractUser):
         choices=TIMEZONES,
         default=settings.TIME_ZONE
     )
+    avatar = models.ImageField(
+        upload_to='avatars',
+        blank=True, null=True)
 
     # Remove username field from AbstractUser
     username = None
