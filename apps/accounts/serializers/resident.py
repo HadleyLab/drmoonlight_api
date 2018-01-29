@@ -22,8 +22,8 @@ class ResidentCreateSerializer(UserCreateSerializer):
 
 
 class ResidentUpdateSerializer(AvatarFieldMixin):
-    specialities = MultipartM2MField()
-    state_license_states = MultipartArrayField()
+    specialities = MultipartM2MField(required=False)
+    state_license_states = MultipartArrayField(required=False)
 
     class Meta:
         model = Resident
