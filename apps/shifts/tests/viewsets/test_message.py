@@ -1,4 +1,7 @@
+import os
+
 from django.test import mock
+from django.conf import settings
 
 from apps.main.tests import APITestCase
 from apps.shifts.factories import ApplicationFactory, MessageFactory
@@ -197,5 +200,20 @@ class MessageViewSetTestCase(ShiftsTestCaseMixin, APITestCase):
         self.assertEqual(message.text, data['text'])
         mock_process_message_creation.assert_called_with(message)
 
+    @mock.patch(
+        'apps.shifts.viewsets.message.process_message_creation', autospec=True)
+    def test_send_message_with_upload(
+            self, mock_process_message_creation):
+        self.authenticate_as_resident(self.approved_resident)
 
+        avatar_path = os.path.join(
+            settings.BASE_DIR, 'apps/accounts/tests/fixtures/avatar.jpg')
+        data = self.get_message_data(attachment=open(avatar_path, 'rb'))
+        resp = self.client.post(
+            '/api/shifts/application/{0}/message/'.format(
+                self.first_application.pk),
+            data, format='multipart')
 
+        self.assertSuccessResponse(resp)
+        self.assertIsNotNone(resp.data['attachment'])
+        self.assertIsNotNone(resp.data['thumbnail'])
