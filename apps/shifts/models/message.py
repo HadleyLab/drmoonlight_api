@@ -24,6 +24,7 @@ class Message(TimestampModelMixin, models.Model):
         verbose_name='Text'
     )
     attachment = models.FileField(
+        upload_to='chat',
         blank=True, null=True
     )
 

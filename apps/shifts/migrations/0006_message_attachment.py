@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='message',
             name='attachment',
-            field=models.FileField(blank=True, null=True, upload_to=''),
+            field=models.FileField(blank=True, null=True, upload_to='chat'),
         ),
     ]
