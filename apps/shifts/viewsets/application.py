@@ -3,7 +3,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, pagination, status, response
 from rest_framework.decorators import list_route
 
-from apps.accounts.models import ResidentStateEnum
 from apps.main.viewsets import add_transition_actions
 
 from apps.shifts.models import Application

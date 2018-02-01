@@ -1,12 +1,14 @@
 from rest_framework import serializers
 
 from apps.main.utils import get_avatar_thumbnail
+from apps.main.validators import validate_file_size
 from apps.shifts.models import Message
 
 
 class MessageSerializer(serializers.ModelSerializer):
 
     owner_avatar = serializers.SerializerMethodField()
+    attachment = serializers.FileField(validators=[validate_file_size])
     thumbnail = serializers.ImageField(read_only=True)
 
     def get_owner_avatar(self, obj):
