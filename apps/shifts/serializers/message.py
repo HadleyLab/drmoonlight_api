@@ -8,7 +8,9 @@ from apps.shifts.models import Message
 class MessageSerializer(serializers.ModelSerializer):
 
     owner_avatar = serializers.SerializerMethodField()
-    attachment = serializers.FileField(validators=[validate_file_size])
+    attachment = serializers.FileField(
+        validators=[validate_file_size],
+        required=False)
     thumbnail = serializers.ImageField(read_only=True)
 
     def get_owner_avatar(self, obj):
