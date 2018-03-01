@@ -144,7 +144,8 @@ class Resident(ResidentNotificationSettingsMixin,
         default=ResidentStateEnum.NEW,
         choices=ResidentStateEnum.CHOICES
     )
-    cv_link = models.URLField(
+    cv_link = models.CharField(
+        max_length=200,
         verbose_name='Link to CV',
         null=True, blank=True
     )
